@@ -5784,14 +5784,25 @@ document.addEventListener(
 
     render();
 
+function hasExistingUserData() {
+    const profile = state.profile || {};
 
-    if (
-        !state.profile.name
-    ) {
+    return Boolean(
+        profile.name?.trim() ||
+        profile.birthDate ||
+        Number(state.salary) > 0 ||
+        (state.expenses && state.expenses.length > 0) ||
+        (state.debts && state.debts.length > 0) ||
+        (state.fund && state.fund.length > 0) ||
+        (state.goals && state.goals.length > 0) ||
+        (state.subscriptions && state.subscriptions.length > 0)
+    );
+}
 
-        open(
-            'welcomeOverlay'
-        );
-    }
+if (!hasExistingUserData()) {
+    open('welcomeOverlay');
+} else {
+    document.getElementById('welcomeOverlay')?.classList.add('hidden');
+}
 
 })();
