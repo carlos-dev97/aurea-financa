@@ -4044,10 +4044,11 @@ color: var(--danger);
     }
 
     .settings-data-card .secondary-button,
-    .settings-data-card .danger-button {
-        width: 100%;
-        margin-left: 55px;
-    }
+.settings-data-card .danger-button {
+    width: 100%;
+    margin-left: 0;
+    box-sizing: border-box;
+}
 
 
 /* =========================================================
@@ -6325,4 +6326,45 @@ textarea {
         padding: 13px;
     }
 
+}
+
+/* =========================================================
+   SCROLL DAS DEFINIÇÕES
+   ========================================================= */
+
+.settings-modal {
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Scrollbar das definições */
+.settings-modal::-webkit-scrollbar {
+    width: 8px;
+}
+
+.settings-modal::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.settings-modal::-webkit-scrollbar-thumb {
+    background: #d5d9e0;
+    border-radius: 10px;
+}
+
+.settings-modal::-webkit-scrollbar-thumb:hover {
+    background: #b9bec8;
+}
+
+/* Firefox */
+.settings-modal {
+    scrollbar-width: thin;
+    scrollbar-color: #d5d9e0 transparent;
+}
+
+/* Em ecrãs pequenos */
+@media (max-width: 900px) {
+    .settings-modal {
+        max-height: calc(100vh - 24px);
+    }
 }
