@@ -5660,3 +5660,298 @@ textarea {
     }
 
 }
+/* =========================================================
+   CORREÇÃO — DEFINIÇÕES / CARDS
+   ========================================================= */
+
+.settings-modal {
+    overflow: hidden;
+}
+
+
+/* Cada bloco das definições fica visualmente dentro
+   do seu próprio card */
+.settings-modal .settings-group {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 22px;
+
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+
+    margin-bottom: 16px;
+}
+
+
+/* Cabeçalho de cada grupo */
+.settings-modal .settings-section-title {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 12px;
+
+    width: 100%;
+    min-width: 0;
+
+    margin-bottom: 18px;
+}
+
+
+/* Ícone */
+.settings-modal .settings-section-icon {
+    flex: 0 0 38px;
+
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: var(--accent-soft);
+    color: var(--accent);
+
+    font-size: 17px;
+}
+
+
+/* Área do título */
+.settings-modal .settings-section-title > div {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+
+/* Título */
+.settings-modal .settings-section-title h3 {
+    margin: 0 0 4px;
+
+    font-size: 16px;
+    line-height: 1.25;
+
+    color: var(--text);
+}
+
+
+/* Descrição */
+.settings-modal .settings-section-title .muted {
+    margin: 0;
+
+    font-size: 13px;
+    line-height: 1.45;
+
+    color: var(--muted);
+
+    overflow-wrap: anywhere;
+}
+
+
+/* Campos */
+.settings-modal .settings-fields {
+    width: 100%;
+    min-width: 0;
+
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 14px;
+
+    margin-bottom: 16px;
+}
+
+
+.settings-modal .settings-fields label {
+    min-width: 0;
+}
+
+
+/* Inputs nunca saem do card */
+.settings-modal input {
+    width: 100%;
+    max-width: 100%;
+
+    box-sizing: border-box;
+}
+
+
+/* Botões */
+.settings-modal .full {
+    width: 100%;
+}
+
+
+/* Subsecções — Tema / Cor */
+.settings-modal .settings-subsection {
+    width: 100%;
+    min-width: 0;
+
+    margin-top: 18px;
+}
+
+
+.settings-modal .settings-label {
+    display: block;
+
+    margin-bottom: 9px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    color: var(--text);
+}
+
+
+/* Escolhas */
+.settings-modal .settings-choice-grid,
+.settings-modal .accent-choice-grid {
+    width: 100%;
+    min-width: 0;
+}
+
+
+/* Cards de dados */
+.settings-modal .settings-data-actions {
+    width: 100%;
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+
+.settings-modal .settings-data-card {
+    width: 100%;
+    min-width: 0;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 15px;
+
+    border: 1px solid var(--line);
+    border-radius: 14px;
+
+    background: var(--surface-soft);
+}
+
+
+.settings-modal .settings-data-icon {
+    flex: 0 0 36px;
+
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+
+.settings-modal .settings-data-content {
+    flex: 1 1 auto;
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+
+.settings-modal .settings-data-content strong,
+.settings-modal .settings-data-content span {
+    overflow-wrap: anywhere;
+}
+
+
+.settings-modal .settings-data-content strong {
+    color: var(--text);
+}
+
+
+.settings-modal .settings-data-content span {
+    color: var(--muted);
+
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .settings-modal .settings-group {
+        padding: 17px;
+        border-radius: 16px;
+    }
+
+
+    .settings-modal .settings-fields {
+        grid-template-columns: 1fr;
+    }
+
+
+    .settings-modal .settings-data-card {
+        align-items: flex-start;
+    }
+
+
+    .settings-modal .settings-data-card button {
+        flex-shrink: 0;
+    }
+
+}
+
+
+/* =========================================================
+   ECRÃS MUITO PEQUENOS
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+    .settings-modal .settings-group {
+        padding: 14px;
+    }
+
+
+    .settings-modal .settings-section-title {
+        gap: 9px;
+    }
+
+
+    .settings-modal .settings-section-icon {
+        flex-basis: 34px;
+
+        width: 34px;
+        height: 34px;
+    }
+
+
+    .settings-modal .settings-data-card {
+        flex-wrap: wrap;
+    }
+
+
+    .settings-modal .settings-data-card button {
+        width: 100%;
+    }
+
+}
