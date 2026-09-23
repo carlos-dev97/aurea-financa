@@ -6403,3 +6403,13 @@ textarea {
         scrollbar-color: #cfd4dc transparent;
     }
 }
+
+/* =========================================================
+   DEFINIÇÕES — ESPAÇO PARA A BARRA INFERIOR NO MOBILE
+   ========================================================= */
+
+@media (max-width: 900px) {
+    #settingsOverlay .settings-modal {
+        padding-bottom: 110px !important;
+    }
+}
