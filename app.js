@@ -2510,37 +2510,156 @@
 
     function navigate(section) {
 
-        document
-            .querySelectorAll('.app-section')
-            .forEach(element => {
+    /* =====================================================
+       SECÇÃO PRINCIPAL
+       ===================================================== */
 
-                element.classList.toggle(
-                    'active',
-                    element.id ===
-                    `section-${section}`
-                );
-            });
+    document
+        .querySelectorAll('.app-section')
+        .forEach(element => {
 
+            element.classList.toggle(
+                'active',
+                element.id ===
+                `section-${section}`
+            );
 
-        document
-            .querySelectorAll(
-                '[data-action="navigate"]'
-            )
-            .forEach(button => {
-
-                button.classList.toggle(
-                    'active',
-                    button.dataset.section ===
-                    section
-                );
-            });
-
-
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
         });
+
+
+    /* =====================================================
+       NAVEGAÇÃO DESKTOP
+       ===================================================== */
+
+    document
+        .querySelectorAll(
+            '.sidebar [data-action="navigate"]'
+        )
+        .forEach(button => {
+
+            button.classList.toggle(
+                'active',
+                button.dataset.section ===
+                section
+            );
+
+        });
+
+
+    /* =====================================================
+       NAVEGAÇÃO MOBILE PRINCIPAL
+       ===================================================== */
+
+    const mobilePrimarySections = [
+        'home',
+        'fund',
+        'expenses'
+    ];
+
+
+    document
+        .querySelectorAll(
+            '.mobile-nav-item[data-section]'
+        )
+        .forEach(button => {
+
+            button.classList.toggle(
+                'active',
+                button.dataset.section ===
+                section
+            );
+
+        });
+
+
+    /* =====================================================
+       MENU MAIS
+       ===================================================== */
+
+    const moreSections = [
+        'debts',
+        'goals',
+        'history',
+        'subscriptions',
+        'stats'
+    ];
+
+
+    const isMoreSection =
+        moreSections.includes(section);
+
+
+    const moreButton =
+        document.querySelector(
+            '.mobile-more-button'
+        );
+
+
+    const moreMenu =
+        $('mobileMoreMenu');
+
+
+    /* =====================================================
+       ESTADO DO BOTÃO MAIS
+       ===================================================== */
+
+    if (moreButton) {
+
+        moreButton.classList.toggle(
+            'active',
+            isMoreSection
+        );
+
+        moreButton.setAttribute(
+            'aria-expanded',
+            'false'
+        );
+
     }
+
+
+    /* =====================================================
+       ESTADO DOS ITENS DO MENU MAIS
+       ===================================================== */
+
+    document
+        .querySelectorAll(
+            '.mobile-more-item[data-section]'
+        )
+        .forEach(button => {
+
+            button.classList.toggle(
+                'active',
+                button.dataset.section ===
+                section
+            );
+
+        });
+
+
+    /* =====================================================
+       FECHAR MENU MAIS
+       ===================================================== */
+
+    if (moreMenu) {
+
+        moreMenu.classList.remove(
+            'open'
+        );
+
+    }
+
+
+    /* =====================================================
+       SCROLL PARA O TOPO
+       ===================================================== */
+
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+
+}
 
 
     /* =========================================================
@@ -4622,6 +4741,125 @@
 
 
             event.preventDefault();
+
+            if (action === 'toggle-more') {
+
+    const moreMenu =
+        $('mobileMoreMenu');
+
+
+    const moreButton =
+        document.querySelector(
+            '.mobile-more-button'
+        );
+
+
+    if (!moreMenu) {
+        return;
+    }
+
+
+    const isOpen =
+        moreMenu.classList.contains(
+            'open'
+        );
+
+
+    if (isOpen) {
+
+        moreMenu.classList.remove(
+            'open'
+        );
+
+        if (moreButton) {
+
+            moreButton.setAttribute(
+                'aria-expanded',
+                'false'
+            );
+
+        }
+
+    } else {
+
+        moreMenu.classList.add(
+            'open'
+        );
+
+        if (moreButton) {
+
+            moreButton.setAttribute(
+                'aria-expanded',
+                'true'
+            );
+
+        }
+
+    }
+
+
+    return;
+}
+
+/* =========================================================
+   FECHAR MENU MAIS AO CLICAR FORA
+   ========================================================= */
+
+document.addEventListener(
+    'click',
+    event => {
+
+        const moreMenu =
+            $('mobileMoreMenu');
+
+
+        const moreButton =
+            document.querySelector(
+                '.mobile-more-button'
+            );
+
+
+        if (
+            !moreMenu ||
+            !moreButton
+        ) {
+            return;
+        }
+
+
+        if (
+            !moreMenu.classList.contains(
+                'open'
+            )
+        ) {
+            return;
+        }
+
+
+        if (
+            event.target.closest(
+                '#mobileMoreMenu'
+            ) ||
+            event.target.closest(
+                '.mobile-more-button'
+            )
+        ) {
+            return;
+        }
+
+
+        moreMenu.classList.remove(
+            'open'
+        );
+
+
+        moreButton.setAttribute(
+            'aria-expanded',
+            'false'
+        );
+
+    }
+);
 
 
             if (action === 'navigate') {

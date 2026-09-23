@@ -1387,31 +1387,8 @@
         data-action="navigate"
         data-section="home"
     >
-        <span
-            class="nav-svg"
-            aria-hidden="true"
-        ></span>
-
-        <small>
-            Início
-        </small>
-    </button>
-
-
-    <button
-        type="button"
-        class="mobile-nav-item"
-        data-action="navigate"
-        data-section="debts"
-    >
-        <span
-            class="nav-svg"
-            aria-hidden="true"
-        ></span>
-
-        <small>
-            Dívidas
-        </small>
+        <span class="nav-svg" aria-hidden="true"></span>
+        <small>Início</small>
     </button>
 
 
@@ -1421,14 +1398,8 @@
         data-action="navigate"
         data-section="fund"
     >
-        <span
-            class="nav-svg"
-            aria-hidden="true"
-        ></span>
-
-        <small>
-            Fundo
-        </small>
+        <span class="nav-svg" aria-hidden="true"></span>
+        <small>Fundo</small>
     </button>
 
 
@@ -1438,85 +1409,85 @@
         data-action="navigate"
         data-section="expenses"
     >
-        <span
-            class="nav-svg"
-            aria-hidden="true"
-        ></span>
-
-        <small>
-            Despesas
-        </small>
+        <span class="nav-svg" aria-hidden="true"></span>
+        <small>Despesas</small>
     </button>
 
 
     <button
         type="button"
-        class="mobile-nav-item"
-        data-action="navigate"
-        data-section="goals"
+        class="mobile-nav-item mobile-more-button"
+        data-action="toggle-more"
+        aria-expanded="false"
+        aria-controls="mobileMoreMenu"
     >
-        <span
-            class="nav-svg"
-            aria-hidden="true"
-        ></span>
-
-        <small>
-            Objetivos
-        </small>
-    </button>
-
-
-    <button
-        type="button"
-        class="mobile-nav-item"
-        data-action="navigate"
-        data-section="history"
-    >
-        <span
-            class="nav-svg"
-            aria-hidden="true"
-        ></span>
-
-        <small>
-            Histórico
-        </small>
-    </button>
-
-
-    <button
-        type="button"
-        class="mobile-nav-item"
-        data-action="navigate"
-        data-section="subscriptions"
-    >
-        <span
-            class="nav-svg"
-            aria-hidden="true"
-        ></span>
-
-        <small>
-            Subscrições
-        </small>
-    </button>
-
-
-    <button
-        type="button"
-        class="mobile-nav-item"
-        data-action="navigate"
-        data-section="stats"
-    >
-        <span
-            class="nav-svg"
-            aria-hidden="true"
-        ></span>
-
-        <small>
-            Estatísticas
-        </small>
+        <span class="nav-svg" aria-hidden="true"></span>
+        <small>Mais</small>
     </button>
 
 </nav>
+
+
+<div
+    id="mobileMoreMenu"
+    class="mobile-more-menu"
+>
+
+    <button
+        type="button"
+        class="mobile-more-item"
+        data-action="navigate"
+        data-section="debts"
+    >
+        <span class="nav-svg" aria-hidden="true"></span>
+        <span>Dívidas</span>
+    </button>
+
+
+    <button
+        type="button"
+        class="mobile-more-item"
+        data-action="navigate"
+        data-section="goals"
+    >
+        <span class="nav-svg" aria-hidden="true"></span>
+        <span>Objetivos</span>
+    </button>
+
+
+    <button
+        type="button"
+        class="mobile-more-item"
+        data-action="navigate"
+        data-section="history"
+    >
+        <span class="nav-svg" aria-hidden="true"></span>
+        <span>Histórico</span>
+    </button>
+
+
+    <button
+        type="button"
+        class="mobile-more-item"
+        data-action="navigate"
+        data-section="subscriptions"
+    >
+        <span class="nav-svg" aria-hidden="true"></span>
+        <span>Subscrições</span>
+    </button>
+
+
+    <button
+        type="button"
+        class="mobile-more-item"
+        data-action="navigate"
+        data-section="stats"
+    >
+        <span class="nav-svg" aria-hidden="true"></span>
+        <span>Estatísticas</span>
+    </button>
+
+</div>
 
 
 <!-- =========================================================
@@ -1529,7 +1500,6 @@
 >
     <div class="modal settings-modal">
 
-```
     <div class="modal-header">
         <div>
             <span class="eyebrow">
@@ -1876,7 +1846,7 @@
     </div>
 
 </div>
-```
+
 
 </div>
 
