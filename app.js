@@ -2505,42 +2505,169 @@
 
 
     /* =========================================================
-       NAVEGAÇÃO
-       ========================================================= */
+   NAVEGAÇÃO
+   ========================================================= */
 
-    function navigate(section) {
+function navigate(section) {
 
-        document
-            .querySelectorAll('.app-section')
-            .forEach(element => {
+    /* =====================================================
+       SECÇÃO PRINCIPAL
+       ===================================================== */
 
-                element.classList.toggle(
-                    'active',
-                    element.id ===
-                    `section-${section}`
-                );
-            });
+    document
+        .querySelectorAll('.app-section')
+        .forEach(element => {
 
+            element.classList.toggle(
+                'active',
+                element.id === `section-${section}`
+            );
 
-        document
-            .querySelectorAll(
-                '[data-action="navigate"]'
-            )
-            .forEach(button => {
-
-                button.classList.toggle(
-                    'active',
-                    button.dataset.section ===
-                    section
-                );
-            });
-
-
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
         });
+
+
+    /* =====================================================
+       NAVEGAÇÃO DESKTOP
+       ===================================================== */
+
+    document
+        .querySelectorAll(
+            '.sidebar [data-action="navigate"]'
+        )
+        .forEach(button => {
+
+            button.classList.toggle(
+                'active',
+                button.dataset.section === section
+            );
+
+        });
+
+
+    /* =====================================================
+       NAVEGAÇÃO MOBILE PRINCIPAL
+       ===================================================== */
+
+    const mobilePrimarySections = [
+        'home',
+        'fund',
+        'expenses'
+    ];
+
+
+    document
+        .querySelectorAll(
+            '.mobile-nav-item[data-section]'
+        )
+        .forEach(button => {
+
+            const buttonSection =
+                button.dataset.section;
+
+
+            /*
+             * Os botões principais só ficam ativos
+             * quando correspondem diretamente à secção.
+             */
+            button.classList.toggle(
+                'active',
+                mobilePrimarySections.includes(
+                    buttonSection
+                ) &&
+                buttonSection === section
+            );
+
+        });
+
+
+    /* =====================================================
+       SECÇÕES DENTRO DE "MAIS"
+       ===================================================== */
+
+    const moreSections = [
+        'debts',
+        'goals',
+        'history',
+        'subscriptions',
+        'stats'
+    ];
+
+
+    const isMoreSection =
+        moreSections.includes(section);
+
+
+    const moreButton =
+        document.querySelector(
+            '.mobile-more-button'
+        );
+
+
+    const moreMenu =
+        $('mobileMoreMenu');
+
+
+    /* =====================================================
+       BOTÃO "MAIS"
+       ===================================================== */
+
+    if (moreButton) {
+
+        moreButton.classList.toggle(
+            'active',
+            isMoreSection
+        );
+
+
+        moreButton.setAttribute(
+            'aria-expanded',
+            'false'
+        );
+
     }
+
+
+    /* =====================================================
+       ITENS DENTRO DO MENU "MAIS"
+       ===================================================== */
+
+    document
+        .querySelectorAll(
+            '.mobile-more-item[data-section]'
+        )
+        .forEach(button => {
+
+            button.classList.toggle(
+                'active',
+                button.dataset.section === section
+            );
+
+        });
+
+
+    /* =====================================================
+       FECHAR MENU "MAIS"
+       ===================================================== */
+
+    if (moreMenu) {
+
+        moreMenu.classList.remove(
+            'open'
+        );
+
+    }
+
+
+    /* =====================================================
+       SCROLL PARA O TOPO
+       ===================================================== */
+
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+
+}
 
 
     /* =========================================================
@@ -4623,6 +4750,52 @@
 
             event.preventDefault();
 
+            if (action === 'toggle-more') {
+
+    const moreMenu =
+        $('mobileMoreMenu');
+
+
+    const moreButton =
+        document.querySelector(
+            '.mobile-more-button'
+        );
+
+
+    if (!moreMenu) {
+        return;
+    }
+
+
+    const isOpen =
+        moreMenu.classList.contains(
+            'open'
+        );
+
+
+    moreMenu.classList.toggle(
+        'open',
+        !isOpen
+    );
+
+
+    if (moreButton) {
+
+        moreButton.setAttribute(
+            'aria-expanded',
+            String(!isOpen)
+        );
+
+    }
+
+
+    return;
+}
+
+/* =========================================================
+   FECHAR MENU MAIS AO CLICAR FORA
+   ========================================================= */
+
 
             if (action === 'navigate') {
 
@@ -5156,7 +5329,73 @@
 
         }
     );
+/* =========================================================
+   FECHAR MENU "MAIS" AO CLICAR FORA
+   ========================================================= */
 
+document.addEventListener(
+    'click',
+    event => {
+
+        const moreMenu =
+            $('mobileMoreMenu');
+
+
+        const moreButton =
+            document.querySelector(
+                '.mobile-more-button'
+            );
+
+
+        if (
+            !moreMenu ||
+            !moreButton
+        ) {
+            return;
+        }
+
+
+        if (
+            !moreMenu.classList.contains(
+                'open'
+            )
+        ) {
+            return;
+        }
+
+
+        const clickedInsideMenu =
+            event.target.closest(
+                '#mobileMoreMenu'
+            );
+
+
+        const clickedMoreButton =
+            event.target.closest(
+                '.mobile-more-button'
+            );
+
+
+        if (
+            clickedInsideMenu ||
+            clickedMoreButton
+        ) {
+            return;
+        }
+
+
+        moreMenu.classList.remove(
+            'open'
+        );
+
+
+        moreButton.setAttribute(
+            'aria-expanded',
+            'false'
+        );
+
+    }
+);
 
     /* =========================================================
        FORMULÁRIOS FIXOS
