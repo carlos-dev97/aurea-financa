@@ -65,182 +65,279 @@
 <div class="app-shell">
 
     <!-- =====================================================
-         SIDEBAR
-         ===================================================== -->
+     SIDEBAR
+     ===================================================== -->
 
-    <aside class="sidebar">
+<aside class="sidebar">
 
-        <div class="brand">
+    <div class="brand">
 
-            <div>
+        <div>
 
-                <strong>
-                    Aurea Finanças
-                </strong>
+            <strong>
+                Aurea Finanças
+            </strong>
 
-                <span>
-                    Gestão simples e elegante
-                </span>
-
-            </div>
+            <span>
+                Gestão simples e elegante
+            </span>
 
         </div>
 
+    </div>
 
-        <nav class="sidebar-nav">
 
-            <button
-                type="button"
-                class="nav-item active"
-                data-action="navigate"
-                data-section="home"
+    <nav class="sidebar-nav">
+
+        <!-- INÍCIO -->
+        <button
+            type="button"
+            class="nav-item active"
+            data-action="navigate"
+            data-section="home"
+        >
+            <span
+                class="nav-svg"
+                aria-hidden="true"
             >
-                <span
-                    class="nav-svg"
-                    aria-hidden="true"
-                ></span>
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 10.5 12 3l9 7.5"></path>
+                    <path d="M5.5 9.5V21h13V9.5"></path>
+                    <path d="M9.5 21v-6h5v6"></path>
+                </svg>
+            </span>
 
-                <span>
-                    Início
-                </span>
-            </button>
+            <span>
+                Início
+            </span>
+        </button>
 
 
-            <button
-                type="button"
-                class="nav-item"
-                data-action="navigate"
-                data-section="debts"
+        <!-- DÍVIDAS -->
+        <button
+            type="button"
+            class="nav-item"
+            data-action="navigate"
+            data-section="debts"
+        >
+            <span
+                class="nav-svg"
+                aria-hidden="true"
             >
-                <span
-                    class="nav-svg"
-                    aria-hidden="true"
-                ></span>
+                <svg viewBox="0 0 24 24">
+                    <rect
+                        x="3"
+                        y="5"
+                        width="18"
+                        height="14"
+                        rx="2"
+                    ></rect>
 
-                <span>
-                    Dívidas
-                </span>
-            </button>
+                    <path d="M3 10h18"></path>
+
+                    <path d="M7 15h4"></path>
+                </svg>
+            </span>
+
+            <span>
+                Dívidas
+            </span>
+        </button>
 
 
-            <button
-                type="button"
-                class="nav-item"
-                data-action="navigate"
-                data-section="fund"
+        <!-- FUNDO -->
+        <button
+            type="button"
+            class="nav-item"
+            data-action="navigate"
+            data-section="fund"
+        >
+            <span
+                class="nav-svg"
+                aria-hidden="true"
             >
-                <span
-                    class="nav-svg"
-                    aria-hidden="true"
-                ></span>
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 8h16v12H4z"></path>
+                    <path d="M6 8V5h12v3"></path>
+                    <path d="M4 12h16"></path>
+                    <path d="M15 12v3h5"></path>
+                    <circle
+                        cx="15"
+                        cy="15"
+                        r="1"
+                    ></circle>
+                </svg>
+            </span>
 
-                <span>
-                    Fundo
-                </span>
-            </button>
+            <span>
+                Fundo
+            </span>
+        </button>
 
 
-            <button
-                type="button"
-                class="nav-item"
-                data-action="navigate"
-                data-section="expenses"
+        <!-- DESPESAS -->
+        <button
+            type="button"
+            class="nav-item"
+            data-action="navigate"
+            data-section="expenses"
+        >
+            <span
+                class="nav-svg"
+                aria-hidden="true"
             >
-                <span
-                    class="nav-svg"
-                    aria-hidden="true"
-                ></span>
+                <svg viewBox="0 0 24 24">
+                    <path d="M6 3h12v18H6z"></path>
+                    <path d="M9 7h6"></path>
+                    <path d="M9 11h6"></path>
+                    <path d="M9 15h3"></path>
+                </svg>
+            </span>
 
-                <span>
-                    Despesas
-                </span>
-            </button>
+            <span>
+                Despesas
+            </span>
+        </button>
 
 
-            <button
-                type="button"
-                class="nav-item"
-                data-action="navigate"
-                data-section="goals"
+        <!-- OBJETIVOS -->
+        <button
+            type="button"
+            class="nav-item"
+            data-action="navigate"
+            data-section="goals"
+        >
+            <span
+                class="nav-svg"
+                aria-hidden="true"
             >
-                <span
-                    class="nav-svg"
-                    aria-hidden="true"
-                ></span>
+                <svg viewBox="0 0 24 24">
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="8"
+                    ></circle>
 
-                <span>
-                    Objetivos
-                </span>
-            </button>
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="4"
+                    ></circle>
+
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="1"
+                    ></circle>
+                </svg>
+            </span>
+
+            <span>
+                Objetivos
+            </span>
+        </button>
 
 
-            <button
-                type="button"
-                class="nav-item"
-                data-action="navigate"
-                data-section="history"
+        <!-- HISTÓRICO -->
+        <button
+            type="button"
+            class="nav-item"
+            data-action="navigate"
+            data-section="history"
+        >
+            <span
+                class="nav-svg"
+                aria-hidden="true"
             >
-                <span
-                    class="nav-svg"
-                    aria-hidden="true"
-                ></span>
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+                    <path d="M3 5v6h6"></path>
+                    <path d="M12 7v5l3 2"></path>
+                </svg>
+            </span>
 
-                <span>
-                    Histórico
-                </span>
-            </button>
+            <span>
+                Histórico
+            </span>
+        </button>
 
 
-            <button
-                type="button"
-                class="nav-item"
-                data-action="navigate"
-                data-section="subscriptions"
+        <!-- SUBSCRIÇÕES -->
+        <button
+            type="button"
+            class="nav-item"
+            data-action="navigate"
+            data-section="subscriptions"
+        >
+            <span
+                class="nav-svg"
+                aria-hidden="true"
             >
-                <span
-                    class="nav-svg"
-                    aria-hidden="true"
-                ></span>
+                <svg viewBox="0 0 24 24">
+                    <rect
+                        x="3"
+                        y="5"
+                        width="18"
+                        height="14"
+                        rx="2"
+                    ></rect>
 
-                <span>
-                    Subscrições
-                </span>
-            </button>
+                    <path d="M3 9h18"></path>
+
+                    <path d="M7 14h4"></path>
+                </svg>
+            </span>
+
+            <span>
+                Subscrições
+            </span>
+        </button>
 
 
-            <button
-                type="button"
-                class="nav-item"
-                data-action="navigate"
-                data-section="stats"
+        <!-- ESTATÍSTICAS -->
+        <button
+            type="button"
+            class="nav-item"
+            data-action="navigate"
+            data-section="stats"
+        >
+            <span
+                class="nav-svg"
+                aria-hidden="true"
             >
-                <span
-                    class="nav-svg"
-                    aria-hidden="true"
-                ></span>
+                <svg viewBox="0 0 24 24">
+                    <path d="M4 19V5"></path>
+                    <path d="M4 19h16"></path>
 
-                <span>
-                    Estatísticas
-                </span>
-            </button>
+                    <path d="M7 16v-4"></path>
+                    <path d="M11 16V8"></path>
+                    <path d="M15 16v-6"></path>
+                    <path d="M19 16V5"></path>
+                </svg>
+            </span>
 
-        </nav>
+            <span>
+                Estatísticas
+            </span>
+        </button>
+
+    </nav>
 
 
-        <div class="sidebar-footer">
+    <div class="sidebar-footer">
 
-            <p>
-                Pequenos passos.<br>
-                Grandes resultados.
-            </p>
+        <p>
+            Pequenos passos.<br>
+            Grandes resultados.
+        </p>
 
-            <small>
-                Desenvolvido por Carlos Sá
-            </small>
+        <small>
+            Desenvolvido por Carlos Sá
+        </small>
 
-        </div>
+    </div>
 
-    </aside>
+</aside>
 
 
     <!-- =====================================================

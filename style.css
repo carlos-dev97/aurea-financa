@@ -6413,3 +6413,31 @@ textarea {
         padding-bottom: 110px !important;
     }
 }
+
+/* TESTE DOS ÍCONES DE NAVEGAÇÃO */
+
+.nav-svg {
+    display: inline-flex !important;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+    min-height: 22px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: currentColor !important;
+    opacity: 1 !important;
+}
+
+.nav-svg svg {
+    display: block !important;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+    fill: none !important;
+    stroke: currentColor !important;
+    stroke-width: 1.8 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    visibility: visible !important;
+}
