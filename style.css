@@ -5955,3 +5955,374 @@ textarea {
     }
 
 }
+
+/* =========================================================
+   CORREÇÃO FINAL — BOTÕES DOS CARTÕES DE DADOS
+   Exportar / Apagar
+   ========================================================= */
+
+.settings-modal .settings-data-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 15px;
+
+    overflow: hidden;
+}
+
+
+/* Ícone não pode encolher */
+.settings-modal .settings-data-card .settings-data-icon {
+    flex: 0 0 36px;
+
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+}
+
+
+/* Texto ocupa apenas o espaço disponível */
+.settings-modal .settings-data-card .settings-data-content {
+    flex: 1 1 auto;
+
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+
+    overflow: hidden;
+}
+
+
+.settings-modal .settings-data-card .settings-data-content strong,
+.settings-modal .settings-data-card .settings-data-content span {
+    display: block;
+
+    max-width: 100%;
+
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+
+/* BOTÕES — ficam sempre dentro do card */
+.settings-modal .settings-data-card > button {
+    flex: 0 0 auto;
+
+    width: auto;
+    min-width: 82px;
+    max-width: 100%;
+
+    box-sizing: border-box;
+
+    white-space: nowrap;
+
+    position: relative;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .settings-modal .settings-data-card {
+        display: grid;
+
+        grid-template-columns: 36px minmax(0, 1fr);
+        grid-template-rows: auto auto;
+
+        column-gap: 12px;
+        row-gap: 12px;
+
+        align-items: start;
+    }
+
+
+    .settings-modal .settings-data-card .settings-data-icon {
+        grid-column: 1;
+        grid-row: 1;
+
+        flex: none;
+    }
+
+
+    .settings-modal .settings-data-card .settings-data-content {
+        grid-column: 2;
+        grid-row: 1;
+
+        min-width: 0;
+    }
+
+
+    .settings-modal .settings-data-card > button {
+        grid-column: 1 / -1;
+        grid-row: 2;
+
+        width: 100%;
+        min-width: 0;
+
+        justify-self: stretch;
+    }
+
+}
+
+
+/* =========================================================
+   CORREÇÃO FINAL — BOTÕES DOS CARTÕES DE DADOS
+   Exportar / Apagar
+   ========================================================= */
+
+.settings-modal .settings-data-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 15px;
+
+    overflow: hidden;
+}
+
+
+/* Ícone não pode encolher */
+.settings-modal .settings-data-card .settings-data-icon {
+    flex: 0 0 36px;
+
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+}
+
+
+/* Texto ocupa apenas o espaço disponível */
+.settings-modal .settings-data-card .settings-data-content {
+    flex: 1 1 auto;
+
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+
+    overflow: hidden;
+}
+
+
+.settings-modal .settings-data-card .settings-data-content strong,
+.settings-modal .settings-data-card .settings-data-content span {
+    display: block;
+
+    max-width: 100%;
+
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+
+/* BOTÕES — ficam sempre dentro do card */
+.settings-modal .settings-data-card > button {
+    flex: 0 0 auto;
+
+    width: auto;
+    min-width: 82px;
+    max-width: 100%;
+
+    box-sizing: border-box;
+
+    white-space: nowrap;
+
+    position: relative;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .settings-modal .settings-data-card {
+        display: grid;
+
+        grid-template-columns: 36px minmax(0, 1fr);
+        grid-template-rows: auto auto;
+
+        column-gap: 12px;
+        row-gap: 12px;
+
+        align-items: start;
+    }
+
+
+    .settings-modal .settings-data-card .settings-data-icon {
+        grid-column: 1;
+        grid-row: 1;
+
+        flex: none;
+    }
+
+
+    .settings-modal .settings-data-card .settings-data-content {
+        grid-column: 2;
+        grid-row: 1;
+
+        min-width: 0;
+    }
+
+
+    .settings-modal .settings-data-card > button {
+        grid-column: 1 / -1;
+        grid-row: 2;
+
+        width: 100%;
+        min-width: 0;
+
+        justify-self: stretch;
+    }
+
+}
+
+/* =========================================================
+   CORREÇÃO FINAL — BOTÕES DOS CARTÕES DE DADOS
+   Exportar / Apagar
+   ========================================================= */
+
+.settings-modal .settings-data-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 15px;
+
+    overflow: hidden;
+}
+
+
+/* Ícone não pode encolher */
+.settings-modal .settings-data-card .settings-data-icon {
+    flex: 0 0 36px;
+
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+}
+
+
+/* Texto ocupa apenas o espaço disponível */
+.settings-modal .settings-data-card .settings-data-content {
+    flex: 1 1 auto;
+
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+
+    overflow: hidden;
+}
+
+
+.settings-modal .settings-data-card .settings-data-content strong,
+.settings-modal .settings-data-card .settings-data-content span {
+    display: block;
+
+    max-width: 100%;
+
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+
+/* BOTÕES — ficam sempre dentro do card */
+.settings-modal .settings-data-card > button {
+    flex: 0 0 auto;
+
+    width: auto;
+    min-width: 82px;
+    max-width: 100%;
+
+    box-sizing: border-box;
+
+    white-space: nowrap;
+
+    position: relative;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .settings-modal .settings-data-card {
+        display: grid;
+
+        grid-template-columns: 36px minmax(0, 1fr);
+        grid-template-rows: auto auto;
+
+        column-gap: 12px;
+        row-gap: 12px;
+
+        align-items: start;
+    }
+
+
+    .settings-modal .settings-data-card .settings-data-icon {
+        grid-column: 1;
+        grid-row: 1;
+
+        flex: none;
+    }
+
+
+    .settings-modal .settings-data-card .settings-data-content {
+        grid-column: 2;
+        grid-row: 1;
+
+        min-width: 0;
+    }
+
+
+    .settings-modal .settings-data-card > button {
+        grid-column: 1 / -1;
+        grid-row: 2;
+
+        width: 100%;
+        min-width: 0;
+
+        justify-self: stretch;
+    }
+
+}
+
+
+/* =========================================================
+   ECRÃS MUITO PEQUENOS
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+    .settings-modal .settings-data-card {
+        padding: 13px;
+    }
+
+}
