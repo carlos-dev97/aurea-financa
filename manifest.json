@@ -1,0 +1,26 @@
+{
+    "name": "Aurea Finanças",
+    "short_name": "Aurea",
+    "description": "Gestão simples e elegante das tuas finanças.",
+    "start_url": "./index.html",
+    "scope": "./",
+    "display": "standalone",
+    "background_color": "#f5f6f8",
+    "theme_color": "#172033",
+    "lang": "pt-PT",
+    "orientation": "any",
+    "icons": [
+        {
+            "src": "./icons/192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "./icons/512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

@@ -1,0 +1,2112 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#172033"
+    >
+
+    <meta
+        name="description"
+        content="Aurea Finanças — gestão simples das tuas finanças."
+    >
+
+    <meta
+        name="mobile-web-app-capable"
+        content="yes"
+    >
+
+    <meta
+        name="apple-mobile-web-app-capable"
+        content="yes"
+    >
+
+    <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="default"
+    >
+
+    <title>Aurea Finanças</title>
+
+    <link
+        rel="manifest"
+        href="./manifest.json"
+    >
+
+    <link
+        rel="icon"
+        type="image/png"
+        sizes="192x192"
+        href="./icons/192x192.png"
+    >
+
+    <link
+        rel="apple-touch-icon"
+        href="./icons/192x192.png"
+    >
+
+    <link
+        rel="stylesheet"
+        href="./style.css"
+    >
+</head>
+
+
+<body>
+
+<div class="app-shell">
+
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div>
+
+                <strong>
+                    Aurea Finanças
+                </strong>
+
+                <span>
+                    Gestão simples e elegante
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <button
+                type="button"
+                class="nav-item active"
+                data-action="navigate"
+                data-section="home"
+            >
+                <span
+                    class="nav-svg"
+                    aria-hidden="true"
+                ></span>
+
+                <span>
+                    Início
+                </span>
+            </button>
+
+
+            <button
+                type="button"
+                class="nav-item"
+                data-action="navigate"
+                data-section="debts"
+            >
+                <span
+                    class="nav-svg"
+                    aria-hidden="true"
+                ></span>
+
+                <span>
+                    Dívidas
+                </span>
+            </button>
+
+
+            <button
+                type="button"
+                class="nav-item"
+                data-action="navigate"
+                data-section="fund"
+            >
+                <span
+                    class="nav-svg"
+                    aria-hidden="true"
+                ></span>
+
+                <span>
+                    Fundo
+                </span>
+            </button>
+
+
+            <button
+                type="button"
+                class="nav-item"
+                data-action="navigate"
+                data-section="expenses"
+            >
+                <span
+                    class="nav-svg"
+                    aria-hidden="true"
+                ></span>
+
+                <span>
+                    Despesas
+                </span>
+            </button>
+
+
+            <button
+                type="button"
+                class="nav-item"
+                data-action="navigate"
+                data-section="goals"
+            >
+                <span
+                    class="nav-svg"
+                    aria-hidden="true"
+                ></span>
+
+                <span>
+                    Objetivos
+                </span>
+            </button>
+
+
+            <button
+                type="button"
+                class="nav-item"
+                data-action="navigate"
+                data-section="history"
+            >
+                <span
+                    class="nav-svg"
+                    aria-hidden="true"
+                ></span>
+
+                <span>
+                    Histórico
+                </span>
+            </button>
+
+
+            <button
+                type="button"
+                class="nav-item"
+                data-action="navigate"
+                data-section="subscriptions"
+            >
+                <span
+                    class="nav-svg"
+                    aria-hidden="true"
+                ></span>
+
+                <span>
+                    Subscrições
+                </span>
+            </button>
+
+
+            <button
+                type="button"
+                class="nav-item"
+                data-action="navigate"
+                data-section="stats"
+            >
+                <span
+                    class="nav-svg"
+                    aria-hidden="true"
+                ></span>
+
+                <span>
+                    Estatísticas
+                </span>
+            </button>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <p>
+                Pequenos passos.<br>
+                Grandes resultados.
+            </p>
+
+            <small>
+                Desenvolvido por Carlos Sá
+            </small>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN
+         ===================================================== -->
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div class="topbar-mobile-brand">
+
+                <strong>
+                    Aurea
+                </strong>
+
+                <span>
+                    Finanças
+                </span>
+
+            </div>
+
+
+            <div class="topbar-actions">
+
+                <button
+                    type="button"
+                    class="chat-top-button"
+                    data-action="open-chat"
+                    title="Falar com a Aurea"
+                    aria-label="Abrir assistente Aurea"
+                >
+
+                    <span
+                        class="chat-top-icon"
+                        aria-hidden="true"
+                    >
+                        ✦
+                    </span>
+
+                    <span>
+                        Aurea
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="icon-button"
+                    data-action="open-settings"
+                    title="Definições"
+                    aria-label="Abrir definições"
+                >
+                    ⚙
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             INÍCIO
+             ================================================= -->
+
+        <section
+            id="section-home"
+            class="app-section active"
+        >
+
+            <div class="welcome-header">
+
+                <div>
+
+                    <p
+                        class="eyebrow"
+                        id="todayText"
+                    ></p>
+
+                    <h1 id="greeting">
+                        Olá
+                    </h1>
+
+                    <p class="muted">
+                        Aqui tens uma visão simples do teu dinheiro.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div id="birthdayMessage"></div>
+
+
+            <div class="hero-balance card">
+
+                <div>
+
+                    <span class="card-label">
+                        Disponível este mês
+                    </span>
+
+                    <strong
+                        id="availableBalance"
+                        class="hero-value"
+                    >
+                        €0,00
+                    </strong>
+
+                    <p
+                        id="balanceDescription"
+                        class="muted"
+                    >
+                        Define o teu salário para começar.
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="balance-symbol"
+                    aria-hidden="true"
+                >
+                    €
+                </div>
+
+            </div>
+
+
+            <div
+                id="advisorMessage"
+                class="advisor-card"
+            ></div>
+
+
+            <div class="metrics-grid">
+
+                <div class="metric-card card">
+
+                    <span>
+                        Salário
+                    </span>
+
+                    <strong id="metricSalary">
+                        €0,00
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-card card">
+
+                    <span>
+                        Despesas
+                    </span>
+
+                    <strong id="metricExpenses">
+                        €0,00
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-card card">
+
+                    <span>
+                        Pagamentos de dívida
+                    </span>
+
+                    <strong id="metricDebtPayments">
+                        €0,00
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-card card">
+
+                    <span>
+                        Fundo de emergência
+                    </span>
+
+                    <strong id="metricFund">
+                        €0,00
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="two-column">
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <span class="card-label">
+                                Fundo de emergência
+                            </span>
+
+                            <h2 id="homeFundValue">
+                                €0,00
+                            </h2>
+
+                        </div>
+
+                        <span
+                            id="homeFundPercent"
+                            class="badge"
+                        >
+                            0%
+                        </span>
+
+                    </div>
+
+
+                    <div class="progress">
+
+                        <div
+                            id="homeFundProgress"
+                            class="progress-bar"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="progress-info">
+
+                        <span>
+                            Atual
+                        </span>
+
+                        <span id="homeFundTarget">
+                            Meta: €1.000,00
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <span class="card-label">
+                                Dívidas
+                            </span>
+
+                            <h2>
+                                Resumo
+                            </h2>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            class="text-button"
+                            data-action="navigate"
+                            data-section="debts"
+                        >
+                            Ver tudo
+                        </button>
+
+                    </div>
+
+
+                    <div id="homeDebts">
+
+                        <div class="empty-small">
+                            Ainda não tens dívidas registadas.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="card-label">
+                            Movimentos recentes
+                        </span>
+
+                        <h2>
+                            Últimas despesas
+                        </h2>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="text-button"
+                        data-action="navigate"
+                        data-section="expenses"
+                    >
+                        Ver despesas
+                    </button>
+
+                </div>
+
+
+                <div id="recentExpenses"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DÍVIDAS
+             ================================================= -->
+
+        <section
+            id="section-debts"
+            class="app-section"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <p class="eyebrow">
+                        Organização
+                    </p>
+
+                    <h1>
+                        Dívidas
+                    </h1>
+
+                    <p class="muted">
+                        Acompanha o que deves sem complicações.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="primary-button"
+                    data-action="add-debt"
+                >
+                    ＋ Nova dívida
+                </button>
+
+            </div>
+
+
+            <div class="metrics-grid">
+
+                <div class="metric-card card">
+
+                    <span>
+                        Total em dívida
+                    </span>
+
+                    <strong id="debtTotal">
+                        €0,00
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-card card">
+
+                    <span>
+                        Pagamentos este mês
+                    </span>
+
+                    <strong id="debtMonthly">
+                        €0,00
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-card card">
+
+                    <span>
+                        Número de dívidas
+                    </span>
+
+                    <strong id="debtCount">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="debtsList"
+                class="debt-list"
+            ></div>
+
+        </section>
+
+
+        <!-- =================================================
+             FUNDO
+             ================================================= -->
+
+        <section
+            id="section-fund"
+            class="app-section"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <p class="eyebrow">
+                        Segurança
+                    </p>
+
+                    <h1>
+                        Fundo de emergência
+                    </h1>
+
+                    <p class="muted">
+                        Cria uma almofada financeira para os imprevistos.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="fund-overview card">
+
+                <div class="fund-big-value">
+
+                    <span>
+                        Fundo atual
+                    </span>
+
+                    <strong id="fundCurrent">
+                        €0,00
+                    </strong>
+
+                </div>
+
+
+                <div class="fund-target-value">
+
+                    <span>
+                        Meta
+                    </span>
+
+                    <strong id="fundTarget">
+                        €1.000,00
+                    </strong>
+
+                </div>
+
+
+                <div class="progress wide">
+
+                    <div
+                        id="fundProgress"
+                        class="progress-bar"
+                    ></div>
+
+                </div>
+
+
+                <strong
+                    id="fundPercent"
+                    class="fund-percent"
+                >
+                    0%
+                </strong>
+
+            </div>
+
+
+            <div class="two-column">
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <span class="card-label">
+                                Adicionar
+                            </span>
+
+                            <h2>
+                                Reforçar fundo
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+                    <form id="addFundForm">
+
+                        <label>
+                            Valor
+
+                            <input
+                                id="fundAddAmount"
+                                type="number"
+                                min="0.01"
+                                step="0.01"
+                                placeholder="0,00"
+                                required
+                            >
+
+                        </label>
+
+
+                        <label>
+                            Data
+
+                            <input
+                                id="fundAddDate"
+                                type="date"
+                                required
+                            >
+
+                        </label>
+
+
+                        <button
+                            class="primary-button full"
+                            type="submit"
+                        >
+                            Adicionar ao fundo
+                        </button>
+
+                    </form>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <span class="card-label">
+                                Utilizar
+                            </span>
+
+                            <h2>
+                                Levantar dinheiro
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+                    <form id="removeFundForm">
+
+                        <label>
+                            Valor
+
+                            <input
+                                id="fundRemoveAmount"
+                                type="number"
+                                min="0.01"
+                                step="0.01"
+                                placeholder="0,00"
+                                required
+                            >
+
+                        </label>
+
+
+                        <label>
+                            Data
+
+                            <input
+                                id="fundRemoveDate"
+                                type="date"
+                                required
+                            >
+
+                        </label>
+
+
+                        <button
+                            class="secondary-button full"
+                            type="submit"
+                        >
+                            Retirar do fundo
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="card-label">
+                            Histórico
+                        </span>
+
+                        <h2>
+                            Movimentos do fundo
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div id="fundHistory"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DESPESAS
+             ================================================= -->
+
+        <section
+            id="section-expenses"
+            class="app-section"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <p class="eyebrow">
+                        Movimentos
+                    </p>
+
+                    <h1>
+                        Despesas
+                    </h1>
+
+                    <p class="muted">
+                        Regista para onde está a ir o teu dinheiro.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="primary-button"
+                    data-action="add-expense"
+                >
+                    ＋ Nova despesa
+                </button>
+
+            </div>
+
+
+            <div class="metrics-grid">
+
+                <div class="metric-card card">
+
+                    <span>
+                        Total este mês
+                    </span>
+
+                    <strong id="expenseMonthTotal">
+                        €0,00
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-card card">
+
+                    <span>
+                        Número de despesas
+                    </span>
+
+                    <strong id="expenseCount">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-card card">
+
+                    <span>
+                        Média
+                    </span>
+
+                    <strong id="expenseAverage">
+                        €0,00
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="categoryOverview"
+                class="category-grid"
+            ></div>
+
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="card-label">
+                            Histórico
+                        </span>
+
+                        <h2>
+                            Despesas deste mês
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div id="expensesList"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             OBJETIVOS
+             ================================================= -->
+
+        <section
+            id="section-goals"
+            class="app-section"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <p class="eyebrow">
+                        Metas pessoais
+                    </p>
+
+                    <h1>
+                        Objetivos
+                    </h1>
+
+                    <p class="muted">
+                        Junta dinheiro para aquilo que realmente queres alcançar.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="primary-button"
+                    data-action="add-goal"
+                >
+                    ＋ Novo objetivo
+                </button>
+
+            </div>
+
+
+            <div
+                id="goalsList"
+                class="goal-grid"
+            ></div>
+
+        </section>
+
+
+        <!-- =================================================
+             SUBSCRIÇÕES
+             ================================================= -->
+
+        <section
+            id="section-subscriptions"
+            class="app-section"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <p class="eyebrow">
+                        Pagamentos recorrentes
+                    </p>
+
+                    <h1>
+                        Subscrições
+                    </h1>
+
+                    <p class="muted">
+                        Mantém aqui as despesas mensais que se repetem.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="primary-button"
+                    data-action="add-subscription"
+                >
+                    ＋ Nova subscrição
+                </button>
+
+            </div>
+
+
+            <div class="card subscription-summary-card">
+
+                <div>
+
+                    <span class="card-label">
+                        Total mensal
+                    </span>
+
+                    <strong
+                        id="subscriptionsMonthlyTotal"
+                        class="subscription-total"
+                    >
+                        €0,00
+                    </strong>
+
+                </div>
+
+
+                <div
+                    class="subscription-summary-icon"
+                    aria-hidden="true"
+                >
+                    ↻
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="card-label">
+                            Lista
+                        </span>
+
+                        <h2>
+                            As tuas subscrições
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div id="subscriptionsList"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             HISTÓRICO
+             ================================================= -->
+
+        <section
+            id="section-history"
+            class="app-section"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <p class="eyebrow">
+                        Linha do tempo
+                    </p>
+
+                    <h1>
+                        Histórico mensal
+                    </h1>
+
+                    <p class="muted">
+                        Consulta tudo o que aconteceu em cada mês.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="secondary-button"
+                    data-action="export-pdf"
+                >
+                    ▣ Exportar PDF
+                </button>
+
+            </div>
+
+
+            <div class="month-selector card">
+
+                <button
+                    type="button"
+                    class="month-button"
+                    data-action="previous-month"
+                    aria-label="Mês anterior"
+                >
+                    ‹
+                </button>
+
+
+                <strong id="historyMonthLabel">
+                    Setembro 2026
+                </strong>
+
+
+                <button
+                    type="button"
+                    class="month-button"
+                    data-action="next-month"
+                    aria-label="Mês seguinte"
+                >
+                    ›
+                </button>
+
+            </div>
+
+
+            <div class="metrics-grid">
+
+                <div class="metric-card card">
+
+                    <span>
+                        Entradas
+                    </span>
+
+                    <strong id="historyIncome">
+                        €0,00
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-card card">
+
+                    <span>
+                        Saídas
+                    </span>
+
+                    <strong id="historyOut">
+                        €0,00
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-card card">
+
+                    <span>
+                        Disponível
+                    </span>
+
+                    <strong id="historyAvailable">
+                        €0,00
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="card-label">
+                            Movimentos
+                        </span>
+
+                        <h2>
+                            Atividade do mês
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div id="historyMovements"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ESTATÍSTICAS
+             ================================================= -->
+
+        <section
+            id="section-stats"
+            class="app-section"
+        >
+
+            <div class="section-heading">
+
+                <div>
+
+                    <p class="eyebrow">
+                        Visão geral
+                    </p>
+
+                    <h1>
+                        Estatísticas
+                    </h1>
+
+                    <p class="muted">
+                        Percebe melhor os teus hábitos financeiros.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="metrics-grid">
+
+                <div class="metric-card card">
+
+                    <span>
+                        Despesas
+                    </span>
+
+                    <strong id="statsExpenses">
+                        €0,00
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-card card">
+
+                    <span>
+                        Dívidas pagas
+                    </span>
+
+                    <strong id="statsDebt">
+                        €0,00
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-card card">
+
+                    <span>
+                        Fundo
+                    </span>
+
+                    <strong id="statsFund">
+                        €0,00
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="card-label">
+                            Distribuição
+                        </span>
+
+                        <h2>
+                            Categorias
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div id="statsCategories"></div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     NAVEGAÇÃO MOBILE
+     ========================================================= -->
+
+<nav class="mobile-nav">
+
+    <button
+        type="button"
+        class="mobile-nav-item active"
+        data-action="navigate"
+        data-section="home"
+    >
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Início
+        </small>
+    </button>
+
+
+    <button
+        type="button"
+        class="mobile-nav-item"
+        data-action="navigate"
+        data-section="debts"
+    >
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Dívidas
+        </small>
+    </button>
+
+
+    <button
+        type="button"
+        class="mobile-nav-item"
+        data-action="navigate"
+        data-section="fund"
+    >
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Fundo
+        </small>
+    </button>
+
+
+    <button
+        type="button"
+        class="mobile-nav-item"
+        data-action="navigate"
+        data-section="expenses"
+    >
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Despesas
+        </small>
+    </button>
+
+
+    <button
+        type="button"
+        class="mobile-nav-item"
+        data-action="navigate"
+        data-section="goals"
+    >
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Objetivos
+        </small>
+    </button>
+
+
+    <button
+        type="button"
+        class="mobile-nav-item"
+        data-action="navigate"
+        data-section="history"
+    >
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Histórico
+        </small>
+    </button>
+
+
+    <button
+        type="button"
+        class="mobile-nav-item"
+        data-action="navigate"
+        data-section="subscriptions"
+    >
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Subscrições
+        </small>
+    </button>
+
+
+    <button
+        type="button"
+        class="mobile-nav-item"
+        data-action="navigate"
+        data-section="stats"
+    >
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Estatísticas
+        </small>
+    </button>
+
+</nav>
+
+
+<!-- =========================================================
+     DEFINIÇÕES
+     ========================================================= -->
+
+<div
+    id="settingsOverlay"
+    class="overlay hidden"
+>
+    <div class="modal settings-modal">
+
+```
+    <div class="modal-header">
+        <div>
+            <span class="eyebrow">
+                Personalização
+            </span>
+
+            <h2>
+                Definições
+            </h2>
+
+            <p class="settings-intro">
+                Personaliza o teu perfil e ajusta a Aurea às tuas necessidades.
+            </p>
+        </div>
+
+        <button
+            type="button"
+            class="close-button"
+            data-action="close-settings"
+            aria-label="Fechar definições"
+        >
+            ×
+        </button>
+    </div>
+
+
+    <!-- PERFIL -->
+    <form id="profileForm">
+
+        <div class="settings-group">
+
+            <div class="settings-section-title">
+                <span
+                    class="settings-section-icon"
+                    aria-hidden="true"
+                >
+                    ◉
+                </span>
+
+                <div>
+                    <h3>Perfil</h3>
+
+                    <p class="muted">
+                        Os teus dados pessoais usados para personalizar a Aurea.
+                    </p>
+                </div>
+            </div>
+
+
+            <div class="settings-fields">
+
+                <label>
+                    Nome
+
+                    <input
+                        id="settingsName"
+                        type="text"
+                        maxlength="60"
+                        required
+                        autocomplete="name"
+                        placeholder="O teu nome"
+                    >
+                </label>
+
+
+                <label>
+                    Data de nascimento
+
+                    <input
+                        id="settingsBirthDate"
+                        type="date"
+                    >
+                </label>
+
+            </div>
+
+
+            <button
+                class="primary-button full"
+                type="submit"
+            >
+                Guardar perfil
+            </button>
+
+        </div>
+
+    </form>
+
+
+    <!-- FINANÇAS -->
+    <form id="financeForm">
+
+        <div class="settings-group">
+
+            <div class="settings-section-title">
+                <span
+                    class="settings-section-icon"
+                    aria-hidden="true"
+                >
+                    €
+                </span>
+
+                <div>
+                    <h3>Finanças</h3>
+
+                    <p class="muted">
+                        Define os valores base utilizados nos cálculos da Aurea.
+                    </p>
+                </div>
+            </div>
+
+
+            <div class="settings-fields">
+
+                <label>
+                    Salário mensal
+
+                    <input
+                        id="settingsSalary"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0,00"
+                    >
+                </label>
+
+
+                <label>
+                    Meta do fundo de emergência
+
+                    <input
+                        id="settingsFundTarget"
+                        type="number"
+                        min="1"
+                        step="0.01"
+                        placeholder="1000"
+                    >
+                </label>
+
+            </div>
+
+
+            <button
+                class="primary-button full"
+                type="submit"
+            >
+                Guardar dados financeiros
+            </button>
+
+        </div>
+
+    </form>
+
+
+    <!-- APARÊNCIA -->
+    <div class="settings-group">
+
+        <div class="settings-section-title">
+            <span
+                class="settings-section-icon"
+                aria-hidden="true"
+            >
+                ◐
+            </span>
+
+            <div>
+                <h3>Aparência</h3>
+
+                <p class="muted">
+                    Personaliza o visual da Aurea.
+                </p>
+            </div>
+        </div>
+
+
+        <div class="settings-subsection">
+
+            <span class="settings-label">
+                Tema
+            </span>
+
+            <div class="settings-choice-grid">
+
+                <button
+                    type="button"
+                    class="choice-button"
+                    data-action="set-theme"
+                    data-theme-value="light"
+                >
+                    ☀ Claro
+                </button>
+
+
+                <button
+                    type="button"
+                    class="choice-button"
+                    data-action="set-theme"
+                    data-theme-value="dark"
+                >
+                    ☾ Escuro
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="settings-subsection">
+
+            <span class="settings-label">
+                Cor de destaque
+            </span>
+
+            <div class="accent-choice-grid">
+
+                <button
+                    type="button"
+                    class="accent-choice gold"
+                    data-action="set-accent"
+                    data-accent-value="gold"
+                    aria-label="Dourado"
+                    title="Dourado"
+                ></button>
+
+
+                <button
+                    type="button"
+                    class="accent-choice blue"
+                    data-action="set-accent"
+                    data-accent-value="blue"
+                    aria-label="Azul"
+                    title="Azul"
+                ></button>
+
+
+                <button
+                    type="button"
+                    class="accent-choice green"
+                    data-action="set-accent"
+                    data-accent-value="green"
+                    aria-label="Verde"
+                    title="Verde"
+                ></button>
+
+
+                <button
+                    type="button"
+                    class="accent-choice plum"
+                    data-action="set-accent"
+                    data-accent-value="plum"
+                    aria-label="Ameixa"
+                    title="Ameixa"
+                ></button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DADOS -->
+    <div class="settings-group">
+
+        <div class="settings-section-title">
+            <span
+                class="settings-section-icon"
+                aria-hidden="true"
+            >
+                ▣
+            </span>
+
+            <div>
+                <h3>Dados</h3>
+
+                <p class="muted">
+                    Exporta ou gere os dados guardados na Aurea.
+                </p>
+            </div>
+        </div>
+
+
+        <div class="settings-data-actions">
+
+            <div class="settings-data-card">
+
+                <div class="settings-data-icon">
+                    ▣
+                </div>
+
+                <div class="settings-data-content">
+
+                    <strong>
+                        Relatório mensal
+                    </strong>
+
+                    <span>
+                        Cria um relatório completo das tuas finanças.
+                    </span>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="secondary-button"
+                    data-action="export-pdf"
+                >
+                    Exportar
+                </button>
+
+            </div>
+
+
+            <div class="settings-data-card settings-danger-card">
+
+                <div class="settings-data-icon danger-icon">
+                    !
+                </div>
+
+                <div class="settings-data-content">
+
+                    <strong>
+                        Apagar todos os dados
+                    </strong>
+
+                    <span>
+                        Remove permanentemente todos os dados guardados na Aurea.
+                    </span>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="danger-button"
+                    data-action="delete-all"
+                >
+                    Apagar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+
+
+<!-- =========================================================
+     WELCOME
+     ========================================================= -->
+
+<div
+    id="welcomeOverlay"
+    class="overlay"
+>
+
+    <div class="welcome-modal">
+
+        <span class="eyebrow">
+            Bem-vindo à
+        </span>
+
+        <h1>
+            Aurea Finanças
+        </h1>
+
+        <p>
+            Uma forma simples de perceberes o teu dinheiro
+            e tomares melhores decisões todos os meses.
+        </p>
+
+
+        <form id="welcomeForm">
+
+            <label>
+                Como te chamas?
+
+                <input
+                    id="welcomeName"
+                    type="text"
+                    maxlength="60"
+                    placeholder="O teu nome"
+                    required
+                    autocomplete="name"
+                >
+            </label>
+
+
+            <button
+                class="primary-button full"
+                type="submit"
+            >
+                Começar
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     MODAL DINÂMICO
+     ========================================================= -->
+
+<div
+    id="dynamicModal"
+    class="overlay hidden"
+></div>
+
+
+<!-- =========================================================
+     CHAT AUREA
+     ========================================================= -->
+
+<div
+    id="chatOverlay"
+    class="overlay hidden"
+>
+
+    <div class="modal chat-modal">
+
+        <div class="modal-header chat-modal-header">
+
+            <div class="chat-title-wrap">
+
+                <div
+                    class="aurea-avatar"
+                    aria-hidden="true"
+                >
+                    ✦
+                </div>
+
+                <div>
+
+                    <span class="eyebrow">
+                        Aurea
+                    </span>
+
+                    <h2>
+                        Assistente
+                    </h2>
+
+                    <span class="chat-status">
+                        <i></i>
+                        Pronta para ajudar
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="close-button"
+                data-action="close-chat"
+                aria-label="Fechar assistente"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            id="chatMessages"
+            class="chat-messages"
+        ></div>
+
+
+        <div class="quick-questions">
+
+            <button
+                type="button"
+                data-action="quick-chat"
+                data-question="Quanto posso gastar?"
+            >
+                Quanto posso gastar?
+            </button>
+
+
+            <button
+                type="button"
+                data-action="quick-chat"
+                data-question="Posso gastar €50?"
+            >
+                Posso gastar €50?
+            </button>
+
+
+            <button
+                type="button"
+                data-action="quick-chat"
+                data-question="Quanto devo deixar de reserva?"
+            >
+                Quanto devo deixar de reserva?
+            </button>
+
+        </div>
+
+
+        <form id="chatForm">
+
+            <div class="chat-input-wrap">
+
+                <input
+                    id="chatInput"
+                    type="text"
+                    placeholder="Escreve uma pergunta..."
+                    autocomplete="off"
+                    aria-label="Pergunta para a Aurea"
+                >
+
+
+                <button
+                    type="submit"
+                    class="chat-send-button"
+                    aria-label="Enviar mensagem"
+                >
+                    <span>
+                        ↑
+                    </span>
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     CHAT FLUTUANTE
+     ========================================================= -->
+
+<button
+    type="button"
+    class="chat-fab"
+    data-action="open-chat"
+    aria-label="Falar com a Aurea"
+    title="Falar com a Aurea"
+>
+
+    <span class="chat-fab-icon">
+        ✦
+    </span>
+
+    <span class="chat-fab-text">
+        Falar com a Aurea
+    </span>
+
+</button>
+
+
+<div
+    id="toast"
+    class="toast"
+></div>
+
+
+<div
+    id="printReport"
+    class="print-report"
+></div>
+
+
+<script src="./app.js"></script>
+
+</body>
+
+</html>
