@@ -1387,8 +1387,31 @@
         data-action="navigate"
         data-section="home"
     >
-        <span class="nav-svg" aria-hidden="true"></span>
-        <small>Início</small>
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Início
+        </small>
+    </button>
+
+
+    <button
+        type="button"
+        class="mobile-nav-item"
+        data-action="navigate"
+        data-section="debts"
+    >
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Dívidas
+        </small>
     </button>
 
 
@@ -1398,8 +1421,14 @@
         data-action="navigate"
         data-section="fund"
     >
-        <span class="nav-svg" aria-hidden="true"></span>
-        <small>Fundo</small>
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Fundo
+        </small>
     </button>
 
 
@@ -1409,85 +1438,85 @@
         data-action="navigate"
         data-section="expenses"
     >
-        <span class="nav-svg" aria-hidden="true"></span>
-        <small>Despesas</small>
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Despesas
+        </small>
     </button>
 
 
     <button
         type="button"
-        class="mobile-nav-item mobile-more-button"
-        data-action="toggle-more"
-        aria-expanded="false"
-        aria-controls="mobileMoreMenu"
-    >
-        <span class="nav-svg" aria-hidden="true"></span>
-        <small>Mais</small>
-    </button>
-
-</nav>
-
-
-<div
-    id="mobileMoreMenu"
-    class="mobile-more-menu"
->
-
-    <button
-        type="button"
-        class="mobile-more-item"
-        data-action="navigate"
-        data-section="debts"
-    >
-        <span class="nav-svg" aria-hidden="true"></span>
-        <span>Dívidas</span>
-    </button>
-
-
-    <button
-        type="button"
-        class="mobile-more-item"
+        class="mobile-nav-item"
         data-action="navigate"
         data-section="goals"
     >
-        <span class="nav-svg" aria-hidden="true"></span>
-        <span>Objetivos</span>
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Objetivos
+        </small>
     </button>
 
 
     <button
         type="button"
-        class="mobile-more-item"
+        class="mobile-nav-item"
         data-action="navigate"
         data-section="history"
     >
-        <span class="nav-svg" aria-hidden="true"></span>
-        <span>Histórico</span>
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Histórico
+        </small>
     </button>
 
 
     <button
         type="button"
-        class="mobile-more-item"
+        class="mobile-nav-item"
         data-action="navigate"
         data-section="subscriptions"
     >
-        <span class="nav-svg" aria-hidden="true"></span>
-        <span>Subscrições</span>
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Subscrições
+        </small>
     </button>
 
 
     <button
         type="button"
-        class="mobile-more-item"
+        class="mobile-nav-item"
         data-action="navigate"
         data-section="stats"
     >
-        <span class="nav-svg" aria-hidden="true"></span>
-        <span>Estatísticas</span>
+        <span
+            class="nav-svg"
+            aria-hidden="true"
+        ></span>
+
+        <small>
+            Estatísticas
+        </small>
     </button>
 
-</div>
+</nav>
 
 
 <!-- =========================================================
@@ -1498,58 +1527,63 @@
     id="settingsOverlay"
     class="overlay hidden"
 >
+
     <div class="modal settings-modal">
 
-    <div class="modal-header">
-        <div>
-            <span class="eyebrow">
-                Personalização
-            </span>
+        <div class="modal-header">
 
-            <h2>
-                Definições
-            </h2>
+            <div>
 
-            <p class="settings-intro">
-                Personaliza o teu perfil e ajusta a Aurea às tuas necessidades.
-            </p>
-        </div>
-
-        <button
-            type="button"
-            class="close-button"
-            data-action="close-settings"
-            aria-label="Fechar definições"
-        >
-            ×
-        </button>
-    </div>
-
-
-    <!-- PERFIL -->
-    <form id="profileForm">
-
-        <div class="settings-group">
-
-            <div class="settings-section-title">
-                <span
-                    class="settings-section-icon"
-                    aria-hidden="true"
-                >
-                    ◉
+                <span class="eyebrow">
+                    Personalização
                 </span>
 
-                <div>
-                    <h3>Perfil</h3>
+                <h2>
+                    Definições
+                </h2>
 
-                    <p class="muted">
-                        Os teus dados pessoais usados para personalizar a Aurea.
-                    </p>
-                </div>
             </div>
 
 
-            <div class="settings-fields">
+            <button
+                type="button"
+                class="close-button"
+                data-action="close-settings"
+                aria-label="Fechar definições"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="profileForm">
+
+            <div class="settings-group">
+
+                <div class="settings-section-title">
+
+                    <span
+                        class="settings-section-icon"
+                        aria-hidden="true"
+                    >
+                        ◉
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Perfil
+                        </h3>
+
+                        <p class="muted">
+                            Os dados usados para personalizar a Aurea.
+                        </p>
+
+                    </div>
+
+                </div>
+
 
                 <label>
                     Nome
@@ -1560,7 +1594,6 @@
                         maxlength="60"
                         required
                         autocomplete="name"
-                        placeholder="O teu nome"
                     >
                 </label>
 
@@ -1574,45 +1607,46 @@
                     >
                 </label>
 
-            </div>
 
-
-            <button
-                class="primary-button full"
-                type="submit"
-            >
-                Guardar perfil
-            </button>
-
-        </div>
-
-    </form>
-
-
-    <!-- FINANÇAS -->
-    <form id="financeForm">
-
-        <div class="settings-group">
-
-            <div class="settings-section-title">
-                <span
-                    class="settings-section-icon"
-                    aria-hidden="true"
+                <button
+                    class="primary-button full"
+                    type="submit"
                 >
-                    €
-                </span>
+                    Guardar perfil
+                </button>
 
-                <div>
-                    <h3>Finanças</h3>
-
-                    <p class="muted">
-                        Define os valores base utilizados nos cálculos da Aurea.
-                    </p>
-                </div>
             </div>
 
+        </form>
 
-            <div class="settings-fields">
+
+        <form id="financeForm">
+
+            <div class="settings-group">
+
+                <div class="settings-section-title">
+
+                    <span
+                        class="settings-section-icon"
+                        aria-hidden="true"
+                    >
+                        €
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Finanças
+                        </h3>
+
+                        <p class="muted">
+                            Define os valores base usados nos cálculos.
+                        </p>
+
+                    </div>
+
+                </div>
+
 
                 <label>
                     Salário mensal
@@ -1639,217 +1673,177 @@
                     >
                 </label>
 
+
+                <button
+                    class="primary-button full"
+                    type="submit"
+                >
+                    Guardar finanças
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <div class="settings-group">
+
+            <div class="settings-section-title">
+
+                <span
+                    class="settings-section-icon"
+                    aria-hidden="true"
+                >
+                    ◐
+                </span>
+
+                <div>
+
+                    <h3>
+                        Aparência
+                    </h3>
+
+                    <p class="muted">
+                        Personaliza o aspeto da Aurea.
+                    </p>
+
+                </div>
+
             </div>
 
 
+            <div class="settings-subsection">
+
+                <span class="settings-label">
+                    Tema
+                </span>
+
+
+                <div class="settings-choice-grid">
+
+                    <button
+                        type="button"
+                        class="choice-button"
+                        data-action="set-theme"
+                        data-theme-value="light"
+                    >
+                        ☀ Claro
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="choice-button"
+                        data-action="set-theme"
+                        data-theme-value="dark"
+                    >
+                        ☾ Escuro
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="settings-subsection">
+
+                <span class="settings-label">
+                    Cor de destaque
+                </span>
+
+
+                <div class="accent-choice-grid">
+
+                    <button
+                        type="button"
+                        class="accent-choice gold"
+                        data-action="set-accent"
+                        data-accent-value="gold"
+                        aria-label="Dourado"
+                        title="Dourado"
+                    ></button>
+
+
+                    <button
+                        type="button"
+                        class="accent-choice blue"
+                        data-action="set-accent"
+                        data-accent-value="blue"
+                        aria-label="Azul"
+                        title="Azul"
+                    ></button>
+
+
+                    <button
+                        type="button"
+                        class="accent-choice green"
+                        data-action="set-accent"
+                        data-accent-value="green"
+                        aria-label="Verde"
+                        title="Verde"
+                    ></button>
+
+
+                    <button
+                        type="button"
+                        class="accent-choice plum"
+                        data-action="set-accent"
+                        data-accent-value="plum"
+                        aria-label="Ameixa"
+                        title="Ameixa"
+                    ></button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="settings-group danger-zone">
+
+            <div class="settings-section-title">
+
+                <span
+                    class="settings-section-icon"
+                    aria-hidden="true"
+                >
+                    !
+                </span>
+
+                <div>
+
+                    <h3>
+                        Zona de perigo
+                    </h3>
+
+                    <p class="muted">
+                        Esta ação não pode ser desfeita.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <p>
+                Apaga todos os dados guardados na Aurea.
+            </p>
+
+
             <button
-                class="primary-button full"
-                type="submit"
+                type="button"
+                class="danger-button full"
+                data-action="delete-all"
             >
-                Guardar dados financeiros
+                Apagar todos os dados
             </button>
 
         </div>
 
-    </form>
-
-
-    <!-- APARÊNCIA -->
-    <div class="settings-group">
-
-        <div class="settings-section-title">
-            <span
-                class="settings-section-icon"
-                aria-hidden="true"
-            >
-                ◐
-            </span>
-
-            <div>
-                <h3>Aparência</h3>
-
-                <p class="muted">
-                    Personaliza o visual da Aurea.
-                </p>
-            </div>
-        </div>
-
-
-        <div class="settings-subsection">
-
-            <span class="settings-label">
-                Tema
-            </span>
-
-            <div class="settings-choice-grid">
-
-                <button
-                    type="button"
-                    class="choice-button"
-                    data-action="set-theme"
-                    data-theme-value="light"
-                >
-                    ☀ Claro
-                </button>
-
-
-                <button
-                    type="button"
-                    class="choice-button"
-                    data-action="set-theme"
-                    data-theme-value="dark"
-                >
-                    ☾ Escuro
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <div class="settings-subsection">
-
-            <span class="settings-label">
-                Cor de destaque
-            </span>
-
-            <div class="accent-choice-grid">
-
-                <button
-                    type="button"
-                    class="accent-choice gold"
-                    data-action="set-accent"
-                    data-accent-value="gold"
-                    aria-label="Dourado"
-                    title="Dourado"
-                ></button>
-
-
-                <button
-                    type="button"
-                    class="accent-choice blue"
-                    data-action="set-accent"
-                    data-accent-value="blue"
-                    aria-label="Azul"
-                    title="Azul"
-                ></button>
-
-
-                <button
-                    type="button"
-                    class="accent-choice green"
-                    data-action="set-accent"
-                    data-accent-value="green"
-                    aria-label="Verde"
-                    title="Verde"
-                ></button>
-
-
-                <button
-                    type="button"
-                    class="accent-choice plum"
-                    data-action="set-accent"
-                    data-accent-value="plum"
-                    aria-label="Ameixa"
-                    title="Ameixa"
-                ></button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- DADOS -->
-    <div class="settings-group">
-
-        <div class="settings-section-title">
-            <span
-                class="settings-section-icon"
-                aria-hidden="true"
-            >
-                ▣
-            </span>
-
-            <div>
-                <h3>Dados</h3>
-
-                <p class="muted">
-                    Exporta ou gere os dados guardados na Aurea.
-                </p>
-            </div>
-        </div>
-
-
-        <div class="settings-data-actions">
-
-            <div class="settings-data-card">
-
-                <div class="settings-data-icon">
-                    ▣
-                </div>
-
-                <div class="settings-data-content">
-
-                    <strong>
-                        Relatório mensal
-                    </strong>
-
-                    <span>
-                        Cria um relatório completo das tuas finanças.
-                    </span>
-
-                </div>
-
-                <button
-                    type="button"
-                    class="secondary-button"
-                    data-action="export-pdf"
-                >
-                    Exportar
-                </button>
-
-            </div>
-
-
-            <div class="settings-data-card settings-danger-card">
-
-                <div class="settings-data-icon danger-icon">
-                    !
-                </div>
-
-                <div class="settings-data-content">
-
-                    <strong>
-                        Apagar todos os dados
-                    </strong>
-
-                    <span>
-                        Remove permanentemente todos os dados guardados na Aurea.
-                    </span>
-
-                </div>
-
-                <button
-                    type="button"
-                    class="danger-button"
-                    data-action="delete-all"
-                >
-                    Apagar
-                </button>
-
-            </div>
-
-        </div>
-
     </div>
 
 </div>
-
-
-</div>
-
 
 
 <!-- =========================================================
