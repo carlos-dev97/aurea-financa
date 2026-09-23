@@ -5196,3 +5196,467 @@ textarea {
         max-width: 100%;
     }
 }
+
+/* =========================================================
+   AUREA — MOBILE POLISH
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    /* -----------------------------------------------------
+       ESTRUTURA PRINCIPAL
+       ----------------------------------------------------- */
+
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+
+        padding: 0 16px 110px !important;
+    }
+
+
+    /* -----------------------------------------------------
+       TOPO
+       ----------------------------------------------------- */
+
+    .topbar {
+        min-height: 64px;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 12px;
+
+        padding: 12px 0;
+    }
+
+
+    .topbar-mobile-brand {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        min-width: 0;
+    }
+
+
+    .topbar-mobile-brand strong {
+        font-size: 18px;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+    }
+
+
+    .topbar-mobile-brand span {
+        font-size: 11px;
+        line-height: 1.2;
+
+        color: var(--muted);
+    }
+
+
+    .topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        flex-shrink: 0;
+    }
+
+
+    .chat-top-button {
+        min-height: 40px;
+        padding: 0 11px;
+
+        white-space: nowrap;
+    }
+
+
+    .icon-button {
+        width: 40px;
+        height: 40px;
+
+        flex-shrink: 0;
+    }
+
+
+    /* -----------------------------------------------------
+       CABEÇALHOS DAS SECÇÕES
+       ----------------------------------------------------- */
+
+    .welcome-header,
+    .section-heading {
+        width: 100%;
+        gap: 16px;
+    }
+
+
+    .section-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+
+        margin-bottom: 20px;
+    }
+
+
+    .section-heading > div {
+        min-width: 0;
+        flex: 1 1 240px;
+    }
+
+
+    .section-heading .primary-button,
+    .section-heading .secondary-button {
+        flex: 0 0 auto;
+    }
+
+
+    /* -----------------------------------------------------
+       TÍTULOS
+       ----------------------------------------------------- */
+
+    .welcome-header h1,
+    .section-heading h1 {
+        font-size: clamp(27px, 7vw, 36px);
+        line-height: 1.08;
+
+        overflow-wrap: anywhere;
+    }
+
+
+    .muted {
+        overflow-wrap: anywhere;
+    }
+
+
+    /* -----------------------------------------------------
+       CARDS
+       ----------------------------------------------------- */
+
+    .card {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+
+    /* -----------------------------------------------------
+       MÉTRICAS
+       ----------------------------------------------------- */
+
+    .metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+
+        gap: 10px;
+    }
+
+
+    .metric-card {
+        min-width: 0;
+        overflow: hidden;
+    }
+
+
+    .metric-card span {
+        display: block;
+
+        overflow-wrap: anywhere;
+    }
+
+
+    .metric-card strong {
+        display: block;
+
+        font-size: clamp(18px, 5vw, 24px);
+
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+
+    /* -----------------------------------------------------
+       DUAS COLUNAS
+       ----------------------------------------------------- */
+
+    .two-column {
+        grid-template-columns: minmax(0, 1fr) !important;
+
+        gap: 14px;
+    }
+
+
+    /* -----------------------------------------------------
+       BOTÕES DAS SECÇÕES
+       ----------------------------------------------------- */
+
+    .section-heading .primary-button,
+    .section-heading .secondary-button {
+        min-height: 44px;
+
+        white-space: nowrap;
+    }
+
+
+    /* -----------------------------------------------------
+       FORMULÁRIOS
+       ----------------------------------------------------- */
+
+    form {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+
+    label {
+        min-width: 0;
+    }
+
+
+    input,
+    select,
+    textarea {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+
+    .full {
+        width: 100%;
+    }
+
+
+    /* -----------------------------------------------------
+       FUNDO
+       ----------------------------------------------------- */
+
+    .fund-overview {
+        min-width: 0;
+        overflow: hidden;
+    }
+
+
+    .fund-big-value strong,
+    .fund-target-value strong {
+        overflow-wrap: anywhere;
+    }
+
+
+    /* -----------------------------------------------------
+       HISTÓRICO
+       ----------------------------------------------------- */
+
+    .month-selector {
+        width: 100%;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 10px;
+    }
+
+
+    #historyMonthLabel {
+        min-width: 0;
+
+        text-align: center;
+
+        overflow-wrap: anywhere;
+    }
+
+
+    /* -----------------------------------------------------
+       LISTAS
+       ----------------------------------------------------- */
+
+    #debtsList,
+    #expensesList,
+    #goalsList,
+    #subscriptionsList,
+    #historyMovements,
+    #recentExpenses,
+    #fundHistory,
+    #homeDebts,
+    #statsCategories {
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+
+    /* -----------------------------------------------------
+       CHAT FLUTUANTE
+       ----------------------------------------------------- */
+
+    .chat-fab {
+        bottom: 88px;
+        right: 16px;
+
+        max-width: calc(100vw - 32px);
+    }
+
+
+    /* -----------------------------------------------------
+       NAVEGAÇÃO MOBILE
+       ----------------------------------------------------- */
+
+    .mobile-nav {
+        left: 12px !important;
+        right: 12px !important;
+        bottom: 12px !important;
+
+        width: auto !important;
+    }
+
+
+    .mobile-nav-item {
+        flex: 1 1 0 !important;
+        width: auto !important;
+        min-width: 0 !important;
+    }
+
+
+    /* -----------------------------------------------------
+       MENU "MAIS"
+       ----------------------------------------------------- */
+
+    .mobile-more-menu {
+        right: 12px !important;
+        bottom: 88px !important;
+
+        max-width: calc(100vw - 24px);
+    }
+
+
+    .mobile-more-item {
+        min-width: 0;
+    }
+
+}
+
+
+/* =========================================================
+   ECRÃS MUITO PEQUENOS
+   ========================================================= */
+
+@media (max-width: 520px) {
+
+    .main-content {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        padding-bottom: 108px !important;
+    }
+
+
+    .topbar {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+
+    .chat-top-button {
+        padding: 0 9px;
+    }
+
+
+    .chat-top-button span:last-child {
+        display: none;
+    }
+
+
+    .welcome-header h1,
+    .section-heading h1 {
+        font-size: 28px;
+    }
+
+
+    .metrics-grid {
+        gap: 8px;
+    }
+
+
+    .metric-card {
+        padding: 14px;
+    }
+
+
+    .metric-card span {
+        font-size: 12px;
+        line-height: 1.25;
+    }
+
+
+    .metric-card strong {
+        margin-top: 5px;
+        font-size: 18px;
+    }
+
+
+    .section-heading {
+        gap: 12px;
+    }
+
+
+    .section-heading .primary-button,
+    .section-heading .secondary-button {
+        width: 100%;
+    }
+
+
+    .month-selector {
+        padding: 12px;
+    }
+
+
+    .month-button {
+        flex-shrink: 0;
+    }
+
+
+    .chat-fab {
+        right: 12px;
+        bottom: 86px;
+
+        max-width: calc(100vw - 24px);
+    }
+
+}
+
+
+/* =========================================================
+   ECRÃS MUITO ESTREITOS
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+    .metrics-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+
+    .topbar-actions {
+        gap: 5px;
+    }
+
+
+    .chat-top-button {
+        min-width: 40px;
+        padding: 0 8px;
+    }
+
+
+    .mobile-nav {
+        left: 8px !important;
+        right: 8px !important;
+        bottom: 8px !important;
+    }
+
+
+    .mobile-nav-item small {
+        font-size: 10px;
+    }
+
+}
