@@ -5733,31 +5733,42 @@ document.addEventListener(
 
 
     /* =========================================================
-       SERVICE WORKER
-       ========================================================= */
+   SERVICE WORKER
+   ========================================================= */
 
-    if (
-        'serviceWorker' in navigator
-    ) {
+if ('serviceWorker' in navigator) {
 
-        window.addEventListener(
-            'load',
-            () => {
+    window.addEventListener('load', async () => {
 
-                navigator.serviceWorker
-                    .register(
-                        './service-worker.js'
-                    )
-                    .catch(
-                        error =>
-                            console.warn(
-                                'Aurea Service Worker:',
-                                error
-                            )
-                    );
-            }
-        );
-    }
+        try {
+
+            const registration =
+                await navigator.serviceWorker.register(
+                    './service-worker.js',
+                    {
+                        scope: './',
+                        updateViaCache: 'none'
+                    }
+                );
+
+            console.log(
+                'Aurea Service Worker registado:',
+                registration.scope
+            );
+
+            await registration.update();
+
+        } catch (error) {
+
+            console.error(
+                'Aurea Service Worker ERRO:',
+                error
+            );
+        }
+
+    });
+
+}
 
 
     /* =========================================================
