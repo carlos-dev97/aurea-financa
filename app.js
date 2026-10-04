@@ -2174,28 +2174,28 @@ function placePageActions() {
 window.addEventListener('resize', placePageActions);
 
 function showSection(section) {
-  currentSection = section;
+    closeMoreMenu();
+    currentSection = section;
 
-  document.querySelectorAll('.app-section').forEach(el => {
-    el.classList.toggle(
-      'active',
-      el.dataset.section === section
-    );
-  });
+    document.querySelectorAll('.app-section').forEach(el => {
+        el.classList.toggle('active', el.dataset.section === section);
+    });
 
-  document.querySelectorAll('[data-section-target]').forEach(el => {
-    el.classList.toggle(
-      'active',
-      el.dataset.sectionTarget === section
-    );
-  });
+    document.querySelectorAll('[data-section-target]').forEach(el => {
+        el.classList.toggle(
+            'active',
+            el.dataset.sectionTarget === section
+        );
+    });
 
-  placePageActions();
+    document.querySelector('[data-action="open-more"]')
+        ?.classList.toggle(
+            'active',
+            !['home', 'incomes', 'expenses'].includes(section)
+        );
 
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
+    placePageActions();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function setMonth(delta){
@@ -3560,7 +3560,7 @@ function showWelcome() {
 
     document.querySelectorAll(
         '.app-shell, .mobile-nav, .chat-fab, ' +
-        '#settingsModal, #dynamicModal, #chatModal'
+        '#settingsModal, #dynamicModal, #chatModal, #mobileMoreModal'
     ).forEach(el => {
         el.inert = pending;
     });
@@ -3696,32 +3696,188 @@ function setupServiceWorker(){
     }
 }
 
-function init(){
-    state.incomes=Array.isArray(state.incomes)
-        ?state.incomes
-        :[];
+function setupMobileNavigation() {
+    const nav = document.querySelector('.mobile-nav');
+    if (!nav) return;
 
-    currentMonth=ym(today());
+    const primary = ['home', 'incomes', 'expenses'];
+    const buttons = [
+        ...document.querySelectorAll('.sidebar-nav button')
+    ];
 
-    document.querySelector(
-        '.mobile-nav'
-    ).replaceChildren(
-        ...[
-            ...document.querySelectorAll(
-                '.sidebar-nav button'
-            )
-        ].map(button=>{
-            const copy=button.cloneNode(true);
-
-            copy.className=
-                button.classList.contains('active')
-                    ?'active'
-                    :'';
-
+    const copies = primary
+        .map(section => buttons.find(
+            button => button.dataset.sectionTarget === section
+        ))
+        .filter(Boolean)
+        .map(button => {
+            const copy = button.cloneNode(true);
+            copy.className = button.classList.contains('active')
+                ? 'active'
+                : '';
             return copy;
-        })
+        });
+
+    const more = document.createElement('button');
+    more.type = 'button';
+    more.dataset.action = 'open-more';
+    more.setAttribute('aria-haspopup', 'dialog');
+    more.setAttribute('aria-controls', 'mobileMoreModal');
+    more.setAttribute('aria-expanded', 'false');
+
+    more.innerHTML = `
+        <span class="nav-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="5" cy="12" r="1"/>
+                <circle cx="12" cy="12" r="1"/>
+                <circle cx="19" cy="12" r="1"/>
+            </svg>
+        </span>
+        <span>Mais</span>
+    `;
+
+    more.addEventListener('click', openMoreMenu);
+    nav.replaceChildren(...copies, more);
+
+    const modal = document.createElement('div');
+    modal.id = 'mobileMoreModal';
+    modal.className = 'overlay mobile-more-overlay';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-hidden', 'true');
+    modal.setAttribute('aria-labelledby', 'mobileMoreTitle');
+
+    modal.innerHTML = `
+        <div class="mobile-more-dialog">
+            <div class="modal-header">
+                <div>
+                    <span class="eyebrow">Aurea Finanças</span>
+                    <h2 id="mobileMoreTitle">Mais</h2>
+                </div>
+                <button type="button" class="icon-button"
+                        data-close-more aria-label="Fechar menu">
+                    ×
+                </button>
+            </div>
+            <div class="mobile-more-links"></div>
+        </div>
+    `;
+
+    const links = modal.querySelector('.mobile-more-links');
+
+    buttons
+        .filter(button => !primary.includes(
+            button.dataset.sectionTarget
+        ))
+        .forEach(button => {
+            const copy = button.cloneNode(true);
+            copy.className = 'mobile-more-item';
+            links.append(copy);
+        });
+
+    modal.addEventListener('click', event => {
+        if (
+            event.target === modal ||
+            event.target.closest('[data-close-more]')
+        ) {
+            closeMoreMenu();
+        }
+    });
+
+    modal.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopPropagation();
+            closeMoreMenu();
+            return;
+        }
+
+        if (event.key !== 'Tab') return;
+
+        const items = [...modal.querySelectorAll('button')];
+        const first = items[0];
+        const last = items.at(-1);
+
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (
+            !event.shiftKey &&
+            document.activeElement === last
+        ) {
+            event.preventDefault();
+            first.focus();
+        }
+    });
+
+    document.body.append(modal);
+
+    window.matchMedia('(max-width: 680px)')
+        .addEventListener('change', event => {
+            if (!event.matches) closeMoreMenu();
+        });
+}
+
+function openMoreMenu() {
+    const modal = $('mobileMoreModal');
+
+    if (
+        !modal ||
+        !window.matchMedia('(max-width: 680px)').matches
+    ) return;
+
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+
+    document.querySelector('[data-action="open-more"]')
+        .setAttribute('aria-expanded', 'true');
+
+    document.querySelectorAll(
+        '.app-shell, .mobile-nav, .chat-fab'
+    ).forEach(el => {
+        el.inert = true;
+    });
+
+    document.body.classList.add('modal-open');
+    modal.querySelector('button').focus();
+}
+
+function closeMoreMenu() {
+    const modal = $('mobileMoreModal');
+    if (!modal?.classList.contains('open')) return;
+
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+
+    document.querySelectorAll(
+        '.app-shell, .mobile-nav, .chat-fab'
+    ).forEach(el => {
+        el.inert = document.body.classList.contains(
+            'profile-pending'
+        );
+    });
+
+    document.body.classList.remove('modal-open');
+
+    const more = document.querySelector(
+        '[data-action="open-more"]'
     );
 
+    more?.setAttribute('aria-expanded', 'false');
+
+    if (window.matchMedia('(max-width: 680px)').matches) {
+        more?.focus({ preventScroll: true });
+    }
+}
+
+function init() {
+    state.incomes = Array.isArray(state.incomes)
+        ? state.incomes
+        : [];
+
+    currentMonth = ym(today());
+
+    setupMobileNavigation();
     setupEvents();
     setupWelcome();
     setupSettingsOverlay();
@@ -3733,12 +3889,9 @@ function init(){
     render();
 }
 
-if(document.readyState==='loading'){
-    document.addEventListener(
-        'DOMContentLoaded',
-        init
-    );
-}else{
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
     init();
 }
 
