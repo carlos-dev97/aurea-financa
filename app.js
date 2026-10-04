@@ -1,5819 +1,3745 @@
+"use strict";
+
 (() => {
-    'use strict';
+'use strict';
 
-    /* =========================================================
-       AUREA FINANÇAS
-       APP.JS — VERSÃO FINAL
-       ========================================================= */
+const KEY='aurea_financas_v7';
+const LEGACY_KEYS=[
+    'aurea_financas_v6',
+    'aurea_financas_v5',
+    'aurea_financas_v4'
+];
 
-    const KEY = 'aurea_financas_v7';
+const $=id=>document.getElementById(id);
 
-    const LEGACY_KEYS = [
-        'aurea_financas_v6',
-        'aurea_financas_v5',
-        'aurea_financas_v4'
-    ];
+const today=()=>{
+    const d=new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+};
 
-    const money = new Intl.NumberFormat('pt-PT', {
-        style: 'currency',
-        currency: 'EUR'
-    });
+const ym=d=>String(d||'').slice(0,7);
 
-    const $ = id => document.getElementById(id);
+const uid=()=>`${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`;
 
-    const today = () => {
-        const d = new Date();
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
+const sum=(a,fn=x=>x)=>
+    (a||[]).reduce((t,x)=>t+Number(fn(x)||0),0);
 
-        return `${year}-${month}-${day}`;
-    };
+const esc=v=>String(v??'').replace(
+    /[&<>"']/g,
+    c=>({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#39;'
+    })[c]
+);
 
-    const uid = () =>
-        `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+const positiveNumber=v=>{
+    const n=Number(
+        String(v??'').replace(',','.').trim()
+    );
 
-    const ym = date =>
-        String(date || '').slice(0, 7);
+    return Number.isFinite(n)&&n>0
+        ?Math.round(n*100)/100
+        :0;
+};
 
-    const sum = (arr, fn = x => x) =>
-        (arr || []).reduce((total, item) => {
-            return total + Number(fn(item) || 0);
-        }, 0);
+const CATEGORIES=[
+    'Alimentação',
+    'Carro',
+    'Lazer',
+    'Compras',
+    'Contas',
+    'Saúde',
+    'Outros'
+];
 
-    const esc = value =>
-        String(value ?? '').replace(/[&<>"']/g, char => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#39;'
-        }[char]));
+const CATEGORY_DATA={
+    'Alimentação':[
+        'food',
+        '<svg viewBox="0 0 24 24"><path d="M7 3v8"/><path d="M4 3v5a3 3 0 0 0 6 0V3"/><path d="M7 11v10"/><path d="M17 3v18"/><path d="M17 3c3 2 3 7 0 9"/></svg>'
+    ],
+    'Carro':[
+        'car',
+        '<svg viewBox="0 0 24 24"><path d="M5 17h14"/><path d="M6 17l1-7h10l1 7"/><path d="M8 10l1.2-3h5.6l1.2 3"/><circle cx="8" cy="17" r="1.5"/><circle cx="16" cy="17" r="1.5"/></svg>'
+    ],
+    'Lazer':[
+        'fun',
+        '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>'
+    ],
+    'Compras':[
+        'shopping',
+        '<svg viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>'
+    ],
+    'Contas':[
+        'bills',
+        '<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>'
+    ],
+    'Saúde':[
+        'health',
+        '<svg viewBox="0 0 24 24"><path d="M12 20S4 15 4 9a4 4 0 0 1 8-1 4 4 0 0 1 8 1c0 6-8 11-8 11z"/><path d="M12 7v6"/><path d="M9 10h6"/></svg>'
+    ],
+    'Outros':[
+        'other',
+        '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M8 12h8M12 8v8"/></svg>'
+    ]
+};
 
-    const positiveNumber = value => {
-        const number = Number(
-            String(value ?? '')
-                .replace(',', '.')
-                .trim()
-        );
+function normalizeCategory(c){
+    const x=String(c||'Outros');
 
-        return Number.isFinite(number) && number > 0
-            ? number
-            : 0;
-    };
+    return x==='Combustível'||x==='Combustivel'
+        ?'Carro'
+        :CATEGORIES.includes(x)
+            ?x
+            :'Outros';
+}
 
+function categoryIcon(name){
+    const [c,icon]=
+        CATEGORY_DATA[normalizeCategory(name)]||
+        CATEGORY_DATA.Outros;
 
-    /* =========================================================
-       CATEGORIAS
-       ========================================================= */
+    return `<div class="category-icon ${c}">${icon}</div>`;
+}
 
-    const CATEGORY_DATA = {
-        'Alimentação': {
-            className: 'food',
-            icon: `
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M7 3v8"/>
-                    <path d="M4 3v5a3 3 0 0 0 6 0V3"/>
-                    <path d="M7 11v10"/>
-                    <path d="M17 3v18"/>
-                    <path d="M17 3c3 2 3 7 0 9"/>
-                </svg>
-            `
-        },
+const defaults={
+    profile:{
+        name:'',
+        birthDate:''
+    },
+    incomes:[],
+    safetyMargin:0,
+    currency:'EUR',
+    fundTarget:1000,
+    fund:[],
+    debts:[],
+    expenses:[],
+    subscriptions:[],
+    goals:[],
+    theme:'light',
+    accent:'gold'
+};
 
-        'Carro': {
-            className: 'car',
-            icon: `
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M5 17h14"/>
-                    <path d="M6 17l1-7h10l1 7"/>
-                    <path d="M8 10l1.2-3h5.6l1.2 3"/>
-                    <circle cx="8" cy="17" r="1.5"/>
-                    <circle cx="16" cy="17" r="1.5"/>
-                </svg>
-            `
-        },
+function cloneDefaults(){
+    return JSON.parse(JSON.stringify(defaults));
+}
 
-        'Lazer': {
-            className: 'fun',
-            icon: `
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="3" y="5" width="18" height="14" rx="2"/>
-                    <path d="m10 9 5 3-5 3z"/>
-                </svg>
-            `
-        },
+function load(){
+    let saved=null;
 
-        'Compras': {
-            className: 'shopping',
-            icon: `
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M6 8h12l-1 12H7z"/>
-                    <path d="M9 8a3 3 0 0 1 6 0"/>
-                </svg>
-            `
-        },
+    for(const k of [KEY,...LEGACY_KEYS]){
+        try{
+            const r=localStorage.getItem(k);
 
-        'Contas': {
-            className: 'bills',
-            icon: `
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="5" y="3" width="14" height="18" rx="2"/>
-                    <path d="M8 7h8"/>
-                    <path d="M8 11h8"/>
-                    <path d="M8 15h5"/>
-                </svg>
-            `
-        },
+            if(r){
+                saved=JSON.parse(r);
 
-        'Saúde': {
-            className: 'health',
-            icon: `
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 20S4 15 4 9a4 4 0 0 1 8-1 4 4 0 0 1 8 1c0 6-8 11-8 11z"/>
-                    <path d="M12 7v6"/>
-                    <path d="M9 10h6"/>
-                </svg>
-            `
-        },
-
-        'Outros': {
-            className: 'other',
-            icon: `
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="12" r="8"/>
-                    <path d="M8 12h8"/>
-                    <path d="M12 8v8"/>
-                </svg>
-            `
-        }
-    };
-
-
-    const CATEGORY_ALIASES = {
-        'Combustível': 'Carro',
-        'Combustivel': 'Carro'
-    };
-
-
-    function normalizeCategory(category) {
-
-        const value = String(category || '').trim();
-
-        if (!value) {
-            return 'Outros';
-        }
-
-        return CATEGORY_ALIASES[value] || value;
-    }
-
-
-    function categoryIcon(category, extraClass = '') {
-
-        const normalized = normalizeCategory(category);
-
-        const data =
-            CATEGORY_DATA[normalized] ||
-            CATEGORY_DATA['Outros'];
-
-        return `
-            <div class="category-icon ${data.className} ${extraClass}">
-                ${data.icon}
-            </div>
-        `;
-    }
-
-
-    /* =========================================================
-       ESTADO INICIAL
-       ========================================================= */
-
-    const defaults = {
-        profile: {
-            name: '',
-            birthDate: ''
-        },
-
-        salary: 0,
-
-        fundTarget: 1000,
-
-        fund: [],
-
-        debts: [],
-
-        expenses: [],
-
-        subscriptions: [],
-
-        goals: [],
-
-        theme: 'light',
-
-        accent: 'gold'
-    };
-
-
-    /* =========================================================
-       STORAGE
-       ========================================================= */
-
-    function cloneDefaults() {
-
-        return JSON.parse(
-            JSON.stringify(defaults)
-        );
-    }
-
-
-    function load() {
-
-        let saved = null;
-
-        try {
-
-            const keys = [
-                KEY,
-                ...LEGACY_KEYS
-            ];
-
-            for (const key of keys) {
-
-                const raw = localStorage.getItem(key);
-
-                if (!raw) {
-                    continue;
-                }
-
-                try {
-
-                    saved = JSON.parse(raw);
-
-                    if (saved) {
-                        break;
-                    }
-
-                } catch {
-                    continue;
-                }
+                if(saved)break;
             }
-
-        } catch {
-            saved = null;
-        }
-
-
-        const base = cloneDefaults();
-
-        const state = {
-            ...base,
-            ...(saved || {}),
-
-            profile: {
-                ...base.profile,
-                ...(saved?.profile || {})
-            },
-
-            fund: Array.isArray(saved?.fund)
-                ? saved.fund
-                : [],
-
-            debts: Array.isArray(saved?.debts)
-                ? saved.debts
-                : [],
-
-            expenses: Array.isArray(saved?.expenses)
-                ? saved.expenses
-                : [],
-
-            subscriptions: Array.isArray(saved?.subscriptions)
-                ? saved.subscriptions
-                : [],
-
-            goals: Array.isArray(saved?.goals)
-                ? saved.goals
-                : []
-        };
-
-
-        state.expenses = state.expenses.map(expense => ({
-            ...expense,
-
-            id: expense.id || uid(),
-
-            amount: Number(expense.amount || 0),
-
-            category: normalizeCategory(
-                expense.category
-            ),
-
-            description: String(
-                expense.description || ''
-            ),
-
-            date: expense.date || today()
-        }));
-
-
-        state.debts = state.debts.map(debt => ({
-            ...debt,
-
-            id: debt.id || uid(),
-
-            name: String(
-                debt.name || 'Dívida'
-            ),
-
-            total: Number(
-                debt.total || 0
-            ),
-
-            monthly: Number(
-                debt.monthly || 0
-            ),
-
-            payments: Array.isArray(debt.payments)
-                ? debt.payments.map(payment => ({
-                    ...payment,
-                    id: payment.id || uid(),
-                    amount: Number(payment.amount || 0),
-                    date: payment.date || today()
-                }))
-                : []
-        }));
-
-
-        state.fund = state.fund.map(item => ({
-            ...item,
-
-            id: item.id || uid(),
-
-            amount: Number(
-                item.amount || 0
-            ),
-
-            date: item.date || today(),
-
-            type: item.type === 'remove'
-                ? 'remove'
-                : 'add'
-        }));
-
-
-        state.goals = state.goals.map(goal => ({
-            ...goal,
-
-            id: goal.id || uid(),
-
-            name: String(
-                goal.name || 'Objetivo'
-            ),
-
-            target: Number(
-                goal.target || 0
-            ),
-
-            saved: Number(
-                goal.saved || 0
-            ),
-
-            note: String(
-                goal.note || ''
-            ),
-
-            contributions: Array.isArray(goal.contributions)
-                ? goal.contributions
-                : []
-        }));
-
-
-        state.subscriptions = state.subscriptions.map(item => ({
-            ...item,
-
-            id: item.id || uid(),
-
-            name: String(
-                item.name || 'Subscrição'
-            ),
-
-            amount: Number(
-                item.amount || 0
-            ),
-
-            date: item.date || today()
-        }));
-
-
-        state.salary = Number(
-            state.salary || 0
-        );
-
-        state.fundTarget = Number(
-            state.fundTarget || 1000
-        );
-
-
-        return state;
+        }catch{}
     }
 
+    return normalizeState(saved);
+}
 
-    let state = load();
+function normalizeState(saved){
+    const b=cloneDefaults();
 
-    let currentMonth = ym(today());
+    const s={
+        ...b,
+        ...(saved||{}),
 
+        profile:{
+            ...b.profile,
+            ...(saved?.profile||{})
+        },
 
-    function save() {
+        fund:Array.isArray(saved?.fund)
+            ?saved.fund
+            :[],
 
-        try {
+        debts:Array.isArray(saved?.debts)
+            ?saved.debts
+            :[],
 
-            localStorage.setItem(
-                KEY,
-                JSON.stringify(state)
-            );
+        incomes:Array.isArray(saved?.incomes)
+            ?saved.incomes
+            :[],
 
-        } catch (error) {
+        expenses:Array.isArray(saved?.expenses)
+            ?saved.expenses
+            :[],
 
-            console.error(
-                'Aurea: erro ao guardar dados',
-                error
-            );
-        }
+        subscriptions:Array.isArray(saved?.subscriptions)
+            ?saved.subscriptions
+            :[],
+
+        goals:Array.isArray(saved?.goals)
+            ?saved.goals
+            :[]
+    };
+
+    s.salary=Number(s.salary||0);
+
+    s.safetyMargin=Math.max(
+        0,
+        Number(s.safetyMargin||0)
+    );
+
+    s.currency=['EUR','USD','GBP','CHF','BRL'].includes(s.currency)
+        ?s.currency
+        :'EUR';
+
+    s.fundTarget=Math.max(
+        0,
+        Number(s.fundTarget)||0
+    );
+
+    if(
+        !Array.isArray(saved?.incomes)&&
+        s.salary>0
+    ){
+        s.incomes=[{
+            id:uid(),
+            type:'Salário',
+            description:'Salário',
+            amount:s.salary,
+            date:today()
+        }];
     }
 
-
-    save();
-
-
-    /* =========================================================
-       UTILITÁRIOS DE UI
-       ========================================================= */
-
-    function setText(id, value) {
-
-        const element = $(id);
-
-        if (element) {
-            element.textContent = value;
-        }
-    }
-
-
-    function open(id) {
-
-        const element = $(id);
-
-        if (element) {
-            element.classList.remove('hidden');
-        }
-    }
-
-
-    function close(id) {
-
-        const element = $(id);
-
-        if (element) {
-            element.classList.add('hidden');
-        }
-    }
-
-
-    function showToast(message) {
-
-        let toast = $('toast');
-
-
-        if (!toast) {
-
-            toast = document.createElement('div');
-
-            toast.id = 'toast';
-
-            toast.className = 'toast';
-
-            document.body.appendChild(toast);
-        }
-
-
-        toast.textContent = message;
-
-        toast.classList.add('show');
-
-
-        clearTimeout(
-            toast._timer
-        );
-
-
-        toast._timer = setTimeout(() => {
-
-            toast.classList.remove('show');
-
-        }, 2400);
-    }
-
-
-    /* =========================================================
-       CÁLCULOS
-       ========================================================= */
-
-    function fundBalance() {
-
-        return sum(
-            state.fund,
-            item =>
-                item.type === 'add'
-                    ? item.amount
-                    : -item.amount
-        );
-    }
-
-
-    function fundBalanceWithout(id) {
-
-        return sum(
-            state.fund.filter(
-                item => item.id !== id
-            ),
-            item =>
-                item.type === 'add'
-                    ? item.amount
-                    : -item.amount
-        );
-    }
-
-
-    function debtPaid(debt) {
-
-        return sum(
-            debt?.payments || [],
-            payment => payment.amount
-        );
-    }
-
-
-    function debtBalance(debt) {
-
-        return Math.max(
-            0,
-            Number(debt?.total || 0) -
-            debtPaid(debt)
-        );
-    }
-
-
-    function monthExpenses(month = currentMonth) {
-
-        return state.expenses.filter(
-            expense =>
-                ym(expense.date) === month
-        );
-    }
-
-
-    function monthPayments(month = currentMonth) {
-
-        return state.debts
-            .flatMap(debt =>
-                (debt.payments || []).map(
-                    payment => ({
-                        ...payment,
-                        debtName: debt.name
-                    })
-                )
-            )
-            .filter(
-                payment =>
-                    ym(payment.date) === month
-            );
-    }
-
-
-    function monthFund(month = currentMonth) {
-
-        return state.fund.filter(
-            item =>
-                ym(item.date) === month
-        );
-    }
-
-
-    function monthGoals(month = currentMonth) {
-
-        return state.goals
-            .flatMap(goal =>
-                (goal.contributions || []).map(
-                    contribution => ({
-                        ...contribution,
-                        goalName: goal.name
-                    })
-                )
-            )
-            .filter(
-                item =>
-                    ym(item.date) === month
-            );
-    }
-
-
-    function available(month = currentMonth) {
-
-        const salary = Number(
-            state.salary || 0
-        );
-
-        const expenses = sum(
-            monthExpenses(month),
-            item => item.amount
-        );
-
-        const payments = sum(
-            monthPayments(month),
-            item => item.amount
-        );
-
-        const fundMovements = sum(
-            monthFund(month),
-            item =>
-                item.type === 'add'
-                    ? item.amount
-                    : 0
-        );
-
-        const goals = sum(
-            monthGoals(month),
-            item => item.amount
-        );
-
-
-        return salary
-            - expenses
-            - payments
-            - fundMovements
-            - goals;
-    }
-
-
-    /* =========================================================
-       MARGEM DE SEGURANÇA
-       ========================================================= */
-
-    function spendingRule() {
-
-        const now = new Date();
-
-        const day = now.getDate();
-
-        const daysInMonth =
-            new Date(
-                now.getFullYear(),
-                now.getMonth() + 1,
-                0
-            ).getDate();
-
-        const daysRemaining =
-            Math.max(
-                0,
-                daysInMonth - day
-            );
-
-
-        let rate = 0.75;
-
-        if (day <= 10) {
-            rate = 0.25;
-        } else if (day <= 20) {
-            rate = 0.50;
-        }
-
-
-        return {
-            day,
-            daysInMonth,
-            daysRemaining,
-            rate
-        };
-    }
-
-
-    function spendingPlan() {
-
-        const balance =
-            available();
-
-
-        const rule =
-            spendingRule();
-
-
-        const protectedAmount =
-            Math.max(
-                0,
-                balance
-            ) * rule.rate;
-
-
-        const freeAmount =
-            Math.max(
-                0,
-                balance - protectedAmount
-            );
-
-
-        return {
-            balance,
-            protectedAmount,
-            freeAmount,
-            maxSpend: freeAmount,
-            ...rule
-        };
-    }
-
-
-    function recommendationText() {
-
-        const plan =
-            spendingPlan();
-
-
-        if (state.salary <= 0) {
-
-            return (
-                'Define o teu salário mensal ' +
-                'nas Definições para a Aurea ' +
-                'começar a calcular a tua margem.'
-            );
-        }
-
-
-        if (plan.balance <= 0) {
-
-            return (
-                `Neste momento tens ${money.format(
-                    plan.balance
-                )} disponíveis. Os movimentos registados ` +
-                'já atingiram ou ultrapassaram o salário definido.'
-            );
-        }
-
-
-        return (
-            `Hoje é dia ${plan.day} e faltam ` +
-            `${plan.daysRemaining} ` +
-            `${plan.daysRemaining === 1 ? 'dia' : 'dias'} ` +
-            `para terminar o mês. A Aurea protege ` +
-            `${Math.round(plan.rate * 100)}% do saldo disponível ` +
-            `(${money.format(plan.protectedAmount)}) e deixa ` +
-            `${money.format(plan.maxSpend)} como dinheiro livre.`
-        );
-
-        
-    }
-
-        /* =========================================================
-       ANIVERSÁRIO
-       ========================================================= */
-
-    function renderBirthdayMessage() {
-
-        const container =
-            $('birthdayMessage');
-
-
-        if (!container) {
-            return;
-        }
-
-
-        const birthDate =
-            String(
-                state.profile?.birthDate || ''
-            ).trim();
-
-
-        if (!birthDate) {
-
-            container.innerHTML = '';
-
-            return;
-        }
-
-
-        const todayDate =
-            new Date();
-
-
-        const birth =
-            new Date(
-                `${birthDate}T12:00:00`
-            );
-
-
-        const isBirthday =
-            todayDate.getMonth() ===
-                birth.getMonth() &&
-            todayDate.getDate() ===
-                birth.getDate();
-
-
-        if (!isBirthday) {
-
-            container.innerHTML = '';
-
-            return;
-        }
-
-
-        const name =
-            String(
-                state.profile?.name || ''
-            ).trim();
-
-
-        container.innerHTML = `
-
-            <div class="birthday-card">
-
-                <div
-                    class="birthday-icon"
-                    aria-hidden="true"
-                >
-                    🎂
-                </div>
-
-
-                <div class="birthday-content">
-
-                    <span class="eyebrow">
-                        Um dia especial
-                    </span>
-
-
-                    <h2>
-                        Feliz aniversário${
-                            name
-                                ? `, ${esc(name)}`
-                                : ''
-                        }! 🎉
-                    </h2>
-
-
-                    <p>
-                        Que este novo ano te traga
-                        grandes conquistas,
-                        dentro e fora das tuas finanças. 🥂
-                    </p>
-
-                </div>
-
-            </div>
-
-        `;
-    }
-
-
-
-    /* =========================================================
-       RENDER PRINCIPAL
-       ========================================================= */
-
-    function render() {
-
-        document.body.dataset.theme =
-            state.theme || 'light';
-
-        document.body.dataset.accent =
-            state.accent || 'gold';
-
-
-        renderHome();
-
-        renderDebts();
-
-        renderExpenses();
-
-        renderFund();
-
-        renderGoals();
-
-        renderSubscriptions();
-
-        renderHistory();
-
-        renderStats();
-
-        renderSettings();
-
-        renderThemeButtons();
-        
-        renderBirthdayMessage();
-    }
-
-
-    /* =========================================================
-       INÍCIO
-       ========================================================= */
-
-    function renderHome() {
-
-        const now =
-            new Date();
-
-
-        const greeting =
-            now.getHours() < 12
-                ? 'Bom dia'
-                : now.getHours() < 18
-                    ? 'Boa tarde'
-                    : 'Boa noite';
-
-
-        const name =
-            String(
-                state.profile.name || ''
-            ).trim();
-
-
-        const dateText =
-            new Intl.DateTimeFormat(
-                'pt-PT',
-                {
-                    weekday: 'long',
-                    day: 'numeric',
-                    month: 'long'
-                }
-            )
-                .format(now)
-                .replace(
-                    /^./,
-                    letter =>
-                        letter.toUpperCase()
-                );
-
-
-        setText(
-            'todayText',
-            dateText
-        );
-
-
-        setText(
-            'greeting',
-            name
-                ? `${greeting}, ${name}`
-                : greeting
-        );
-
-
-        const balance =
-            available();
-
-
-        setText(
-            'availableBalance',
-            money.format(balance)
-        );
-
-
-        setText(
-            'balanceDescription',
-            state.salary <= 0
-                ? 'Define o teu salário para começar a calcular.'
-                : balance >= 0
-                    ? 'Saldo disponível depois dos movimentos registados.'
-                    : 'Os movimentos registados ultrapassam o salário definido.'
-        );
-
-
-        setText(
-            'metricSalary',
-            money.format(state.salary)
-        );
-
-
-        setText(
-            'metricExpenses',
-            money.format(
-                sum(
-                    monthExpenses(),
-                    item => item.amount
-                )
-            )
-        );
-
-
-        setText(
-            'metricDebtPayments',
-            money.format(
-                sum(
-                    monthPayments(),
-                    item => item.amount
-                )
-            )
-        );
-
-
-        setText(
-            'metricFund',
-            money.format(
-                fundBalance()
-            )
-        );
-
-
-        const fund =
-            fundBalance();
-
-
-        const target =
-            Number(
-                state.fundTarget || 1000
-            );
-
-
-        const percentage =
-            target > 0
-                ? Math.min(
-                    100,
-                    Math.max(
-                        0,
-                        fund / target * 100
-                    )
-                )
-                : 0;
-
-
-        setText(
-            'homeFundValue',
-            money.format(fund)
-        );
-
-
-        setText(
-            'homeFundPercent',
-            `${Math.round(percentage)}%`
-        );
-
-
-        setText(
-            'homeFundTarget',
-            `Meta: ${money.format(target)}`
-        );
-
-
-        if ($('homeFundProgress')) {
-
-            $('homeFundProgress').style.width =
-                `${percentage}%`;
-        }
-
-
-        renderAdvisor();
-
-        renderRecent();
-
-        renderHomeDebts();
-    }
-
-
-    function renderAdvisor() {
-
-        const element =
-            $('advisorMessage');
-
-
-        if (!element) {
-            return;
-        }
-
-
-        if (state.salary <= 0) {
-
-            element.innerHTML = `
-                <strong>Recomendação da Aurea</strong>
-
-                <p>
-                    Define o teu salário mensal nas Definições.
-                    Depois a Aurea calcula automaticamente
-                    o saldo, a margem protegida e o dinheiro livre.
-                </p>
-            `;
-
-            return;
-        }
-
-
-        const plan =
-            spendingPlan();
-
-
-        const percentage =
-            Math.round(
-                plan.rate * 100
-            );
-
-
-        const width =
-            plan.balance > 0
-                ? Math.min(
-                    100,
-                    plan.maxSpend /
-                    plan.balance *
-                    100
-                )
-                : 0;
-
-
-        const days =
-            Math.max(
-                1,
-                plan.daysRemaining
-            );
-
-
-        const daily =
-            plan.maxSpend / days;
-
-
-        element.innerHTML = `
-            <div class="safety-head">
-                <span>Margem de gasto</span>
-                <strong>
-                    ${money.format(plan.maxSpend)}
-                </strong>
-            </div>
-
-            <div class="safety-track">
-                <div
-                    class="safety-fill good"
-                    style="width:${width}%"
-                ></div>
-            </div>
-
-            <div class="safety-scale">
-                <span>
-                    Saldo:
-                    ${money.format(plan.balance)}
-                </span>
-
-                <span>
-                    Protegido:
-                    ${money.format(plan.protectedAmount)}
-                </span>
-            </div>
-
-            <p>
-                Hoje a Aurea protege
-                <strong>${percentage}%</strong>
-                do saldo disponível.
-
-                Faltam
-                <strong>${plan.daysRemaining}</strong>
-                ${plan.daysRemaining === 1 ? 'dia' : 'dias'}
-                para terminar o mês.
-
-                O dinheiro livre equivale a cerca de
-                <strong>${money.format(daily)}/dia</strong>.
-            </p>
-        `;
-    }
-
-
-    /* =========================================================
-       DÍVIDAS
-       ========================================================= */
-
-    function renderDebts() {
-
-        const element =
-            $('debtsList');
-
-
-        if (!element) {
-            return;
-        }
-
-
-        if (!state.debts.length) {
-
-            element.innerHTML = `
-                <div class="empty card">
-                    <div class="empty-icon">◈</div>
-                    <b>Ainda não tens dívidas.</b>
-                    <span>
-                        Adiciona a primeira para começares a acompanhar.
-                    </span>
-                </div>
-            `;
-
-            updateDebtMetrics();
-
-            return;
-        }
-
-
-        element.innerHTML =
-            state.debts.map(debt => {
-
-                const total =
-                    Number(debt.total || 0);
-
-                const paid =
-                    debtPaid(debt);
-
-                const remaining =
-                    debtBalance(debt);
-
-                const percentage =
-                    total > 0
-                        ? Math.min(
-                            100,
-                            paid / total * 100
-                        )
-                        : 0;
-
-
-                return `
-                    <div class="card debt-card">
-
-                        <div class="card-header">
-
-                            <div class="entity-title">
-
-                                <div class="entity-icon debt-icon-bg">
-                                    ◈
-                                </div>
-
-                                <div>
-                                    <span class="card-label">
-                                        Dívida
-                                    </span>
-
-                                    <h2>
-                                        ${esc(debt.name)}
-                                    </h2>
-                                </div>
-
-                            </div>
-
-                            <div class="row-actions">
-
-                                <button
-                                    type="button"
-                                    data-action="edit-debt"
-                                    data-id="${esc(debt.id)}"
-                                    title="Editar"
-                                >
-                                    ✎
-                                </button>
-
-                                <button
-                                    type="button"
-                                    class="danger-text"
-                                    data-action="delete-debt"
-                                    data-id="${esc(debt.id)}"
-                                    title="Eliminar"
-                                >
-                                    ⌫
-                                </button>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="debt-numbers">
-
-                            <strong>
-                                ${money.format(remaining)}
-                            </strong>
-
-                            <span>
-                                de ${money.format(total)}
-                            </span>
-
-                        </div>
-
-
-                        <div class="progress">
-
-                            <div
-                                class="progress-bar"
-                                style="width:${percentage}%"
-                            ></div>
-
-                        </div>
-
-
-                        <div class="progress-info">
-
-                            <span>
-                                ${Math.round(percentage)}% pago
-                            </span>
-
-                            <span>
-                                ${money.format(debt.monthly || 0)}
-                                /mês
-                            </span>
-
-                        </div>
-
-
-                        <button
-                            type="button"
-                            class="primary-button full"
-                            data-action="pay-debt"
-                            data-id="${esc(debt.id)}"
-                        >
-                            Registar pagamento
-                        </button>
-
-                    </div>
-                `;
-            }).join('');
-
-
-        updateDebtMetrics();
-    }
-
-
-    function updateDebtMetrics() {
-
-        setText(
-            'debtTotal',
-            money.format(
-                sum(
-                    state.debts,
-                    debt => debtBalance(debt)
-                )
-            )
-        );
-
-
-        setText(
-            'debtMonthly',
-            money.format(
-                sum(
-                    monthPayments(),
-                    payment => payment.amount
-                )
-            )
-        );
-
-
-        setText(
-            'debtCount',
-            state.debts.length
-        );
-    }
-
-
-    /* =========================================================
-       DESPESAS
-       ========================================================= */
-
-    function renderExpenses() {
-
-        const expenses =
-            monthExpenses();
-
-
-        const total =
-            sum(
-                expenses,
-                item => item.amount
-            );
-
-
-        setText(
-            'expenseMonthTotal',
-            money.format(total)
-        );
-
-
-        setText(
-            'expenseCount',
-            expenses.length
-        );
-
-
-        setText(
-            'expenseAverage',
-            money.format(
-                expenses.length
-                    ? total / expenses.length
-                    : 0
-            )
-        );
-
-
-        const list =
-            $('expensesList');
-
-
-        if (list) {
-
-            if (!expenses.length) {
-
-                list.innerHTML = `
-                    <div class="empty-small">
-                        Ainda não existem despesas neste mês.
-                    </div>
-                `;
-
-            } else {
-
-                list.innerHTML =
-                    [...expenses]
-                        .sort(
-                            (a, b) =>
-                                b.date.localeCompare(a.date)
-                        )
-                        .map(expense => {
-
-                            return `
-                                <div class="movement">
-
-                                    ${categoryIcon(
-                                        expense.category
-                                    )}
-
-                                    <div class="movement-info">
-
-                                        <b>
-                                            ${esc(
-                                                expense.description ||
-                                                expense.category
-                                            )}
-                                        </b>
-
-                                        <small>
-                                            ${esc(
-                                                normalizeCategory(
-                                                    expense.category
-                                                )
-                                            )}
-                                            ·
-                                            ${esc(expense.date)}
-                                        </small>
-
-                                    </div>
-
-                                    <strong class="out">
-                                        -
-                                        ${money.format(
-                                            expense.amount
-                                        )}
-                                    </strong>
-
-                                    <div class="row-actions">
-
-                                        <button
-                                            type="button"
-                                            data-action="edit-expense"
-                                            data-id="${esc(expense.id)}"
-                                        >
-                                            ✎
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            class="danger-text"
-                                            data-action="delete-expense"
-                                            data-id="${esc(expense.id)}"
-                                        >
-                                            ⌫
-                                        </button>
-
-                                    </div>
-
-                                </div>
-                            `;
-                        })
-                        .join('');
-            }
-        }
-
-
-        renderCategories();
-    }
-
-
-    function renderCategories() {
-
-        const element =
-            $('categoryOverview');
-
-
-        if (!element) {
-            return;
-        }
-
-
-        const totals = {};
-
-
-        monthExpenses().forEach(expense => {
-
-            const category =
-                normalizeCategory(
-                    expense.category
-                );
-
-
-            totals[category] =
-                (totals[category] || 0) +
-                Number(expense.amount || 0);
-        });
-
-
-        const categories =
-            Object.entries(totals)
-                .sort(
-                    (a, b) =>
-                        b[1] - a[1]
-                );
-
-
-        if (!categories.length) {
-
-            element.innerHTML = `
-                <div class="empty-small">
-                    Ainda não existem despesas neste mês.
-                </div>
-            `;
-
-            return;
-        }
-
-
-        element.innerHTML =
-            categories.map(([name, value]) => {
-
-                return `
-                    <div class="category-card card">
-
-                        ${categoryIcon(
-                            name
-                        )}
-
-                        <div>
-                            <span>
-                                ${esc(name)}
-                            </span>
-
-                            <strong>
-                                ${money.format(value)}
-                            </strong>
-                        </div>
-
-                    </div>
-                `;
-
-            }).join('');
-    }
-
-
-    /* =========================================================
-       FUNDO
-       ========================================================= */
-
-    function renderFund() {
-
-        const balance =
-            fundBalance();
-
-
-        const target =
-            Number(
-                state.fundTarget || 1000
-            );
-
-
-        const percentage =
-            target > 0
-                ? Math.min(
-                    100,
-                    Math.max(
-                        0,
-                        balance / target * 100
-                    )
-                )
-                : 0;
-
-
-        setText(
-            'fundCurrent',
-            money.format(balance)
-        );
-
-
-        setText(
-            'fundTarget',
-            money.format(target)
-        );
-
-
-        setText(
-            'fundPercent',
-            `${Math.round(percentage)}%`
-        );
-
-
-        if ($('fundProgress')) {
-
-            $('fundProgress').style.width =
-                `${percentage}%`;
-        }
-
-
-        const list =
-            $('fundHistory');
-
-
-        if (!list) {
-            return;
-        }
-
-
-        if (!state.fund.length) {
-
-            list.innerHTML = `
-                <div class="empty-small">
-                    Ainda não tens movimentos no fundo.
-                </div>
-            `;
-
-            return;
-        }
-
-
-        list.innerHTML =
-            [...state.fund]
-                .sort(
-                    (a, b) =>
-                        b.date.localeCompare(a.date)
-                )
-                .map(item => {
-
-                    const adding =
-                        item.type === 'add';
-
-
-                    return `
-                        <div class="movement">
-
-                            <div class="movement-icon fund-movement">
-                                €
-                            </div>
-
-                            <div class="movement-info">
-
-                                <b>
-                                    ${
-                                        adding
-                                            ? 'Entrada no fundo'
-                                            : 'Levantamento do fundo'
-                                    }
-                                </b>
-
-                                <small>
-                                    ${esc(item.date)}
-                                </small>
-
-                            </div>
-
-                            <strong
-                                class="${
-                                    adding
-                                        ? 'out'
-                                        : 'in'
-                                }"
-                            >
-                                ${
-                                    adding
-                                        ? '-'
-                                        : '+'
-                                }
-                                ${money.format(item.amount)}
-                            </strong>
-
-                            <div class="row-actions">
-
-                                <button
-                                    type="button"
-                                    data-action="edit-fund"
-                                    data-id="${esc(item.id)}"
-                                >
-                                    ✎
-                                </button>
-
-                                <button
-                                    type="button"
-                                    class="danger-text"
-                                    data-action="delete-fund"
-                                    data-id="${esc(item.id)}"
-                                >
-                                    ⌫
-                                </button>
-
-                            </div>
-
-                        </div>
-                    `;
-
-                })
-                .join('');
-    }
-
-
-    /* =========================================================
-       OBJETIVOS
-       ========================================================= */
-
-    function renderGoals() {
-
-        const element =
-            $('goalsList');
-
-
-        if (!element) {
-            return;
-        }
-
-
-        if (!state.goals.length) {
-
-            element.innerHTML = `
-                <div class="empty card">
-
-                    <b>
-                        Ainda não tens objetivos.
-                    </b>
-
-                    <span>
-                        Cria um objetivo para começares
-                        a juntar dinheiro.
-                    </span>
-
-                </div>
-            `;
-
-            return;
-        }
-
-
-        element.innerHTML =
-            state.goals.map(goal => {
-
-                const saved =
-                    Number(goal.saved || 0);
-
-                const target =
-                    Number(goal.target || 0);
-
-                const percentage =
-                    target > 0
-                        ? Math.min(
-                            100,
-                            saved / target * 100
-                        )
-                        : 0;
-
-
-                return `
-                    <div class="card goal-card">
-
-                        <div class="card-header">
-
-                            <div class="entity-title">
-
-                                <div class="entity-icon goal-icon-bg">
-                                    ★
-                                </div>
-
-                                <div>
-
-                                    <span class="card-label">
-                                        Objetivo
-                                    </span>
-
-                                    <h2>
-                                        ${esc(goal.name)}
-                                    </h2>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="row-actions">
-
-                                <button
-                                    type="button"
-                                    data-action="edit-goal"
-                                    data-id="${esc(goal.id)}"
-                                >
-                                    ✎
-                                </button>
-
-                                <button
-                                    type="button"
-                                    class="danger-text"
-                                    data-action="delete-goal"
-                                    data-id="${esc(goal.id)}"
-                                >
-                                    ⌫
-                                </button>
-
-                            </div>
-
-                        </div>
-
-
-                        ${
-                            goal.note
-                                ? `
-                                    <p class="muted">
-                                        ${esc(goal.note)}
-                                    </p>
-                                `
-                                : ''
-                        }
-
-
-                        <div class="debt-numbers">
-
-                            <strong>
-                                ${money.format(saved)}
-                            </strong>
-
-                            <span>
-                                de ${money.format(target)}
-                            </span>
-
-                        </div>
-
-
-                        <div class="progress">
-
-                            <div
-                                class="progress-bar"
-                                style="width:${percentage}%"
-                            ></div>
-
-                        </div>
-
-
-                        <div class="progress-info">
-
-                            <span>
-                                ${Math.round(percentage)}%
-                            </span>
-
-                            <button
-                                type="button"
-                                class="primary-button small"
-                                data-action="goal-add"
-                                data-id="${esc(goal.id)}"
-                            >
-                                + Adicionar dinheiro
-                            </button>
-
-                        </div>
-
-                    </div>
-                `;
-
-            }).join('');
-    }
-
-
-    /* =========================================================
-       SUBSCRIÇÕES
-       ========================================================= */
-
-    function renderSubscriptions() {
-
-        const element =
-            $('subscriptionsList');
-
-
-        if (!element) {
-            return;
-        }
-
-
-        setText(
-            'subscriptionsMonthlyTotal',
-            money.format(
-                sum(
-                    state.subscriptions,
-                    item => item.amount
-                )
-            )
-        );
-
-
-        if (!state.subscriptions.length) {
-
-            element.innerHTML = `
-                <div class="empty-small">
-                    Nenhuma subscrição registada.
-                </div>
-            `;
-
-            return;
-        }
-
-
-        element.innerHTML =
-            state.subscriptions.map(item => {
-
-                return `
-                    <div class="subscription-row">
-
-                        <div class="entity-title">
-
-                            <div class="entity-icon subscription-icon-bg">
-                                ↻
-                            </div>
-
-                            <div>
-
-                                <b>
-                                    ${esc(item.name)}
-                                </b>
-
-                                <small>
-                                    ${money.format(item.amount)}
-                                    /mês
-                                    · cobrança
-                                    ${esc(item.date || '—')}
-                                </small>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="row-actions">
-
-                            <button
-                                type="button"
-                                data-action="edit-subscription"
-                                data-id="${esc(item.id)}"
-                            >
-                                ✎
-                            </button>
-
-                            <button
-                                type="button"
-                                class="danger-text"
-                                data-action="delete-subscription"
-                                data-id="${esc(item.id)}"
-                            >
-                                ⌫
-                            </button>
-
-                        </div>
-
-                    </div>
-                `;
-
-            }).join('');
-    }
-
-
-    /* =========================================================
-       HISTÓRICO
-       ========================================================= */
-
-    function renderHistory() {
-
-        const date =
-            new Date(
-                `${currentMonth}-01T12:00:00`
-            );
-
-
-        const label =
-            new Intl.DateTimeFormat(
-                'pt-PT',
-                {
-                    month: 'long',
-                    year: 'numeric'
-                }
-            )
-                .format(date)
-                .replace(
-                    /^./,
-                    letter =>
-                        letter.toUpperCase()
-                );
-
-
-        setText(
-            'historyMonthLabel',
-            label
-        );
-
-
-        const expenses =
-            monthExpenses();
-
-
-        const payments =
-            monthPayments();
-
-
-        const fund =
-            monthFund();
-
-
-        const goals =
-            monthGoals();
-
-
-        const out =
-            sum(
-                expenses,
-                item => item.amount
-            )
-            +
-            sum(
-                payments,
-                item => item.amount
-            )
-            +
-            sum(
-                fund,
-                item =>
-                    item.type === 'add'
-                        ? item.amount
-                        : 0
-            )
-            +
-            sum(
-                goals,
-                item => item.amount
-            );
-
-
-        setText(
-            'historyIncome',
-            money.format(state.salary)
-        );
-
-
-        setText(
-            'historyOut',
-            money.format(out)
-        );
-
-
-        setText(
-            'historyAvailable',
-            money.format(
-                available(currentMonth)
-            )
-        );
-
-
-        const rows = [
-
-            ...expenses.map(item => ({
-                date: item.date,
-                label:
-                    item.description ||
-                    normalizeCategory(item.category),
-                amount:
-                    -Number(item.amount)
-            })),
-
-            ...payments.map(item => ({
-                date: item.date,
-                label:
-                    `Pagamento · ${item.debtName}`,
-                amount:
-                    -Number(item.amount)
-            })),
-
-            ...fund.map(item => ({
-                date: item.date,
-                label:
-                    item.type === 'add'
-                        ? 'Fundo · reforço'
-                        : 'Fundo · levantamento',
-                amount:
-                    item.type === 'add'
-                        ? -Number(item.amount)
-                        : Number(item.amount)
-            })),
-
-            ...goals.map(item => ({
-                date: item.date,
-                label:
-                    `Objetivo · ${item.goalName}`,
-                amount:
-                    -Number(item.amount)
+    s.incomes=s.incomes.map(x=>({
+        ...x,
+        id:x.id||uid(),
+        type:String(x.type||'Outro'),
+        description:String(x.description||''),
+        amount:Number(x.amount||0),
+        date:x.date||today()
+    }));
+
+    s.expenses=s.expenses.map(x=>({
+        ...x,
+        id:x.id||uid(),
+        category:normalizeCategory(x.category),
+        description:String(x.description||''),
+        amount:Number(x.amount||0),
+        date:x.date||today()
+    }));
+
+    s.debts=s.debts.map(d=>({
+        ...d,
+        id:d.id||uid(),
+        name:String(d.name||'Dívida'),
+        total:Number(d.total||0),
+        monthly:Number(d.monthly||0),
+
+        payments:Array.isArray(d.payments)
+            ?d.payments.map(p=>({
+                ...p,
+                id:p.id||uid(),
+                amount:Number(p.amount||0),
+                date:p.date||today()
             }))
+            :[]
+    }));
 
-        ].sort(
-            (a, b) =>
-                b.date.localeCompare(a.date)
+    s.fund=s.fund.map(x=>({
+        ...x,
+        id:x.id||uid(),
+        type:x.type==='remove'?'remove':'add',
+        amount:Number(x.amount||0),
+        date:x.date||today(),
+        description:String(x.description||'')
+    }));
+
+    s.subscriptions=s.subscriptions.map(x=>({
+        ...x,
+        id:x.id||uid(),
+        name:String(x.name||''),
+        amount:Number(x.amount||0),
+        day:Number(x.day||1)
+    }));
+
+    s.goals=s.goals.map(x=>({
+        ...x,
+        id:x.id||uid(),
+        name:String(x.name||''),
+        target:Number(x.target||0),
+        saved:Number(x.saved||0),
+
+        contributions:Array.isArray(x.contributions)
+            ?x.contributions.map(c=>({
+                ...c,
+                id:c.id||uid(),
+                amount:Number(c.amount)||0,
+                date:c.date||today()
+            }))
+            :[],
+
+        date:x.date||''
+    }));
+
+    delete s.salary;
+
+    return s;
+}
+
+let state=load();
+let currentSection='home';
+let currentMonth=ym(today());
+let editing=null;
+
+function save(){
+    try{
+        localStorage.setItem(
+            KEY,
+            JSON.stringify(state)
         );
+    }catch{}
+}
 
+function money(v){
+    const currency=['EUR','USD','GBP','CHF','BRL'].includes(state.currency)
+        ?state.currency
+        :'EUR';
 
-        const element =
-            $('historyMovements');
+    try{
+        return new Intl.NumberFormat('pt-PT',{
+            style:'currency',
+            currency
+        }).format(Number(v||0));
+    }catch{
+        return `${Number(v||0).toFixed(2)} ${currency}`;
+    }
+}
 
+function formatDate(d){
+    const value=String(d||'');
 
-        if (!element) {
-            return;
-        }
-
-
-        if (!rows.length) {
-
-            element.innerHTML = `
-                <div class="empty-small">
-                    Sem movimentos neste mês.
-                </div>
-            `;
-
-            return;
-        }
-
-
-        element.innerHTML =
-            rows.map(item => {
-
-                return `
-                    <div class="movement">
-
-                        <div class="movement-info">
-
-                            <b>
-                                ${esc(item.label)}
-                            </b>
-
-                            <small>
-                                ${esc(item.date)}
-                            </small>
-
-                        </div>
-
-                        <strong
-                            class="${
-                                item.amount >= 0
-                                    ? 'in'
-                                    : 'out'
-                            }"
-                        >
-                            ${
-                                item.amount >= 0
-                                    ? '+'
-                                    : ''
-                            }
-                            ${money.format(item.amount)}
-                        </strong>
-
-                    </div>
-                `;
-
-            }).join('');
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(value)){
+        return '—';
     }
 
-
-    /* =========================================================
-       ESTATÍSTICAS
-       ========================================================= */
-
-    function renderStats() {
-
-        setText(
-            'statsExpenses',
-            money.format(
-                sum(
-                    monthExpenses(),
-                    item => item.amount
-                )
-            )
-        );
-
-
-        setText(
-            'statsDebt',
-            money.format(
-                sum(
-                    monthPayments(),
-                    item => item.amount
-                )
-            )
-        );
-
-
-        setText(
-            'statsFund',
-            money.format(
-                fundBalance()
-            )
-        );
-
-
-        const totals = {};
-
-
-        monthExpenses().forEach(
-            expense => {
-
-                const category =
-                    normalizeCategory(
-                        expense.category
-                    );
-
-
-                totals[category] =
-                    (totals[category] || 0) +
-                    Number(expense.amount || 0);
-            }
-        );
-
-
-        const total =
-            sum(
-                Object.values(totals)
-            );
-
-
-        const element =
-            $('statsCategories');
-
-
-        if (!element) {
-            return;
-        }
-
-
-        if (!Object.keys(totals).length) {
-
-            element.innerHTML = `
-                <div class="empty-small">
-                    Ainda não existem dados.
-                </div>
-            `;
-
-            return;
-        }
-
-
-        element.innerHTML =
-            Object.entries(totals)
-                .sort(
-                    (a, b) =>
-                        b[1] - a[1]
-                )
-                .map(([name, value]) => {
-
-                    const percentage =
-                        total > 0
-                            ? value / total * 100
-                            : 0;
-
-
-                    return `
-                        <div class="stat-row">
-
-                            ${categoryIcon(name)}
-
-                            <span>
-                                ${esc(name)}
-                            </span>
-
-                            <div class="progress">
-
-                                <div
-                                    class="progress-bar"
-                                    style="width:${percentage}%"
-                                ></div>
-
-                            </div>
-
-                            <b>
-                                ${money.format(value)}
-                            </b>
-
-                        </div>
-                    `;
-
-                })
-                .join('');
-    }
-
-
-    /* =========================================================
-       DEFINIÇÕES
-       ========================================================= */
-
-    function renderSettings() {
-
-        if ($('settingsName')) {
-            $('settingsName').value =
-                state.profile.name || '';
-        }
-
-
-        if ($('settingsBirthDate')) {
-            $('settingsBirthDate').value =
-                state.profile.birthDate || '';
-        }
-
-
-        if ($('settingsSalary')) {
-            $('settingsSalary').value =
-                state.salary || '';
-        }
-
-
-        if ($('settingsFundTarget')) {
-            $('settingsFundTarget').value =
-                state.fundTarget || 1000;
-        }
-    }
-
-
-    function renderThemeButtons() {
-
-        document
-            .querySelectorAll(
-                '[data-action="set-theme"]'
-            )
-            .forEach(button => {
-
-                button.classList.toggle(
-                    'selected',
-                    button.dataset.themeValue ===
-                    state.theme
-                );
-            });
-
-
-        document
-            .querySelectorAll(
-                '[data-action="set-accent"]'
-            )
-            .forEach(button => {
-
-                button.classList.toggle(
-                    'selected',
-                    button.dataset.accentValue ===
-                    state.accent
-                );
-            });
-    }
-
-
-    /* =========================================================
-       RECENTES
-       ========================================================= */
-
-    function renderRecent() {
-
-        const element =
-            $('recentExpenses');
-
-
-        if (!element) {
-            return;
-        }
-
-
-        const expenses =
-            [...state.expenses]
-                .sort(
-                    (a, b) =>
-                        b.date.localeCompare(a.date)
-                )
-                .slice(0, 5);
-
-
-        if (!expenses.length) {
-
-            element.innerHTML = `
-                <div class="empty-small">
-                    Ainda não tens despesas registadas.
-                </div>
-            `;
-
-            return;
-        }
-
-
-        element.innerHTML =
-            expenses.map(expense => {
-
-                return `
-                    <div class="movement">
-
-                        ${categoryIcon(
-                            expense.category
-                        )}
-
-                        <div class="movement-info">
-
-                            <b>
-                                ${esc(
-                                    expense.description ||
-                                    normalizeCategory(
-                                        expense.category
-                                    )
-                                )}
-                            </b>
-
-                            <small>
-                                ${esc(expense.date)}
-                            </small>
-
-                        </div>
-
-                        <strong class="out">
-                            -
-                            ${money.format(
-                                expense.amount
-                            )}
-                        </strong>
-
-                    </div>
-                `;
-
-            }).join('');
-    }
-
-
-    function renderHomeDebts() {
-
-        const element =
-            $('homeDebts');
-
-
-        if (!element) {
-            return;
-        }
-
-
-        if (!state.debts.length) {
-
-            element.innerHTML = `
-                <div class="empty-small">
-                    Ainda não tens dívidas registadas.
-                </div>
-            `;
-
-            return;
-        }
-
-
-        element.innerHTML =
-            state.debts
-                .slice(0, 3)
-                .map(debt => {
-
-                    return `
-                        <div class="mini-debt">
-
-                            <div class="mini-debt-icon">
-                                ◈
-                            </div>
-
-                            <span>
-                                ${esc(debt.name)}
-                            </span>
-
-                            <b>
-                                ${money.format(
-                                    debtBalance(debt)
-                                )}
-                            </b>
-
-                        </div>
-                    `;
-
-                })
-                .join('');
-    }
-
-
-    /* =========================================================
-   NAVEGAÇÃO
-   ========================================================= */
-
-function navigate(section) {
-
-    /* =====================================================
-       SECÇÃO PRINCIPAL
-       ===================================================== */
-
-    document
-        .querySelectorAll('.app-section')
-        .forEach(element => {
-
-            element.classList.toggle(
-                'active',
-                element.id === `section-${section}`
-            );
-
-        });
-
-
-    /* =====================================================
-       NAVEGAÇÃO DESKTOP
-       ===================================================== */
-
-    document
-        .querySelectorAll(
-            '.sidebar [data-action="navigate"]'
-        )
-        .forEach(button => {
-
-            button.classList.toggle(
-                'active',
-                button.dataset.section === section
-            );
-
-        });
-
-
-    /* =====================================================
-       NAVEGAÇÃO MOBILE PRINCIPAL
-       ===================================================== */
-
-    const mobilePrimarySections = [
-        'home',
-        'fund',
-        'expenses'
+    const [y,m,day]=value.split('-');
+
+    return `${day}/${m}/${y}`;
+}
+
+function monthLabel(m){
+    const [y,mo]=String(m).split('-');
+
+    if(!y||!mo)return m;
+
+    const names=[
+        'Janeiro',
+        'Fevereiro',
+        'Março',
+        'Abril',
+        'Maio',
+        'Junho',
+        'Julho',
+        'Agosto',
+        'Setembro',
+        'Outubro',
+        'Novembro',
+        'Dezembro'
     ];
 
+    return `${names[Number(mo)-1]||mo} ${y}`;
+}
 
-    document
-        .querySelectorAll(
-            '.mobile-nav-item[data-section]'
-        )
-        .forEach(button => {
+function monthIncomes(m=currentMonth){
+    return state.incomes.filter(
+        x=>ym(x.date)===m
+    );
+}
 
-            const buttonSection =
-                button.dataset.section;
+function totalIncome(m=currentMonth){
+    return sum(
+        monthIncomes(m),
+        x=>x.amount
+    );
+}
 
+function monthExpenses(m=currentMonth){
+    return state.expenses.filter(
+        x=>ym(x.date)===m
+    );
+}
 
-            /*
-             * Os botões principais só ficam ativos
-             * quando correspondem diretamente à secção.
-             */
-            button.classList.toggle(
-                'active',
-                mobilePrimarySections.includes(
-                    buttonSection
-                ) &&
-                buttonSection === section
-            );
+function totalExpenses(m=currentMonth){
+    return sum(
+        monthExpenses(m),
+        x=>x.amount
+    );
+}
 
-        });
+function monthFundAdds(m=currentMonth){
+    return sum(
+        state.fund.filter(
+            x=>x.type==='add'&&ym(x.date)===m
+        ),
+        x=>x.amount
+    );
+}
 
+function monthGoalContributions(m=currentMonth){
+    return sum(
+        state.goals.flatMap(g=>
+            (g.contributions||[]).filter(
+                x=>ym(x.date)===m
+            )
+        ),
+        x=>x.amount
+    );
+}
 
-    /* =====================================================
-       SECÇÕES DENTRO DE "MAIS"
-       ===================================================== */
+function monthDebtPayments(m=currentMonth){
+    return sum(
+        state.debts.flatMap(d=>
+            (d.payments||[]).filter(
+                p=>ym(p.date)===m
+            )
+        ),
+        x=>x.amount
+    );
+}
 
-    const moreSections = [
-        'debts',
-        'goals',
-        'history',
-        'subscriptions',
-        'stats'
-    ];
+function fundBalance(){
+    return Math.round(
+        sum(
+            state.fund,
+            x=>x.type==='remove'
+                ?-Number(x.amount||0)
+                :Number(x.amount||0)
+        )*100
+    )/100;
+}
 
+function debtPaid(debt){
+    return sum(
+        debt?.payments,
+        p=>p.amount
+    );
+}
 
-    const isMoreSection =
-        moreSections.includes(section);
+function debtBalance(debt){
+    return Math.max(
+        0,
+        Math.round(
+            (
+                Number(debt?.total||0)-
+                debtPaid(debt)
+            )*100
+        )/100
+    );
+}
 
+function totalDebtBalance(){
+    return sum(
+        state.debts,
+        debtBalance
+    );
+}
 
-    const moreButton =
-        document.querySelector(
-            '.mobile-more-button'
-        );
+function monthFundWithdrawals(m = currentMonth) {
+  return sum(
+    state.fund.filter(x => x.type === 'remove' && ym(x.date) === m),
+    x => x.amount
+  );
+}
 
+function available() {
+  const income = totalIncome(currentMonth);
+  const expenses = totalExpenses(currentMonth);
+  const debts = monthDebtPayments(currentMonth);
+  const fund = monthFundAdds(currentMonth);
+  const withdrawals = monthFundWithdrawals(currentMonth);
+  const goals = monthGoalContributions(currentMonth);
 
-    const moreMenu =
-        $('mobileMoreMenu');
+  return Math.round(
+    (income - expenses - debts - fund + withdrawals - goals) * 100
+  ) / 100;
+}
 
+function spendingPlan(){
+    const balance=available();
 
-    /* =====================================================
-       BOTÃO "MAIS"
-       ===================================================== */
+    const protectedAmount=Math.max(
+        0,
+        Number(state.safetyMargin)||0
+    );
 
-    if (moreButton) {
+    return {
+        balance,
+        protectedAmount,
+        freeAmount:Math.round(
+            (balance-protectedAmount)*100
+        )/100,
+        margin:protectedAmount
+    };
+}
 
-        moreButton.classList.toggle(
-            'active',
-            isMoreSection
-        );
+function greeting(){
+    const h=new Date().getHours();
 
+    if(h<12)return 'Bom dia';
+    if(h<19)return 'Boa tarde';
 
-        moreButton.setAttribute(
-            'aria-expanded',
-            'false'
-        );
+    return 'Boa noite';
+}
 
+function birthdayMessage(){
+    const birth=String(
+        state.profile?.birthDate||''
+    );
+
+    if(!birth)return '';
+
+    const now=today();
+
+    if(birth.slice(5)===now.slice(5)){
+        return `Feliz aniversário, ${state.profile?.name||''}! 🎂`;
     }
 
+    return '';
+}
 
-    /* =====================================================
-       ITENS DENTRO DO MENU "MAIS"
-       ===================================================== */
+function applyTheme(){
+    document.documentElement.dataset.theme=
+        state.theme||'light';
 
-    document
-        .querySelectorAll(
-            '.mobile-more-item[data-section]'
-        )
-        .forEach(button => {
+    document.documentElement.dataset.accent=
+        state.accent||'gold';
 
-            button.classList.toggle(
-                'active',
-                button.dataset.section === section
-            );
+    document.body.classList.toggle(
+        'dark-theme',
+        state.theme==='dark'
+    );
+}
 
-        });
+function showToast(message){
+    let toast=$('toast');
 
-
-    /* =====================================================
-       FECHAR MENU "MAIS"
-       ===================================================== */
-
-    if (moreMenu) {
-
-        moreMenu.classList.remove(
-            'open'
-        );
-
+    if(!toast){
+        toast=document.createElement('div');
+        toast.id='toast';
+        toast.className='toast';
+        document.body.appendChild(toast);
     }
 
+    toast.textContent=message;
+    toast.classList.add('show');
 
-    /* =====================================================
-       SCROLL PARA O TOPO
-       ===================================================== */
+    clearTimeout(showToast.timer);
 
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
+    showToast.timer=setTimeout(()=>{
+        toast.classList.remove('show');
+    },2600);
+}
+
+function openModal(html){
+    const modal=$('dynamicModal');
+
+    if(!modal)return;
+
+    const body=modal.querySelector('.modal-body');
+
+    if(body)body.innerHTML=html;
+
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden','false');
+
+    document.body.classList.add('modal-open');
+
+    setTimeout(()=>{
+        const first=modal.querySelector(
+            'input:not([type="hidden"]),select,textarea'
+        );
+
+        if(first)first.focus();
+    },40);
+}
+
+function closeModal(){
+    const modal=$('dynamicModal');
+
+    if(!modal)return;
+
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden','true');
+
+    document.body.classList.remove('modal-open');
+
+    editing=null;
+}
+
+function openChat(){
+    const chat=$('chatModal');
+
+    if(!chat)return;
+
+    chat.classList.add('open');
+    chat.setAttribute('aria-hidden','false');
+
+    const input=$('chatInput');
+
+    if(input){
+        setTimeout(()=>input.focus(),50);
+    }
+}
+
+function closeChat(){
+    const chat=$('chatModal');
+
+    if(!chat)return;
+
+    chat.classList.remove('open');
+    chat.setAttribute('aria-hidden','true');
+}
+
+function goalSavingsPlan(goal, referenceDate = today()) {
+
+    const target = Math.max(
+        0,
+        Math.round((Number(goal.target) || 0) * 100)
+    );
+
+    const saved = Math.max(
+        0,
+        Math.round((Number(goal.saved) || 0) * 100)
+    );
+
+    const remaining = Math.max(0, target - saved);
+
+    if (!target) {
+        return {
+            status: 'target',
+            remaining: 0,
+            months: 0,
+            monthly: 0
+        };
+    }
+
+    if (!remaining) {
+        return {
+            status: 'complete',
+            remaining: 0,
+            months: 0,
+            monthly: 0
+        };
+    }
+
+    const deadline = String(goal.date || '');
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(deadline)) {
+        return {
+            status: 'date',
+            remaining: remaining / 100,
+            months: 0,
+            monthly: 0
+        };
+    }
+
+    if (deadline < referenceDate) {
+        return {
+            status: 'overdue',
+            remaining: remaining / 100,
+            months: 0,
+            monthly: 0
+        };
+    }
+
+    const [year, month] =
+        deadline.split('-').map(Number);
+
+    const [currentYear, currentMonthNumber] =
+        referenceDate.split('-').map(Number);
+
+    const months =
+        (year - currentYear) * 12 +
+        month - currentMonthNumber + 1;
+
+    return {
+        status: 'active',
+        remaining: remaining / 100,
+        months,
+        monthly: Math.ceil(remaining / months) / 100
+    };
 
 }
 
 
-    /* =========================================================
-       MODAIS
-       ========================================================= */
+function goalPlanMarkup(goal) {
 
-    function showModal(title, content) {
+    const plan = goalSavingsPlan(goal);
 
-        const modal =
-            $('dynamicModal');
-
-
-        if (!modal) {
-
-            console.error(
-                'Aurea: dynamicModal não encontrado.'
-            );
-
-            return;
-        }
-
-
-        modal.innerHTML = `
-            <div class="modal">
-
-                <div class="modal-header">
-
-                    <div>
-
-                        <span class="eyebrow">
-                            Aurea
-                        </span>
-
-                        <h2>
-                            ${title}
-                        </h2>
-
-                    </div>
-
-                    <button
-                        type="button"
-                        class="close-button"
-                        data-action="close-dynamic"
-                        aria-label="Fechar"
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-                ${content}
-
+    if (plan.status === 'target') {
+        return `
+            <div class="goal-plan">
+                <span>
+                    Indica o valor pretendido para
+                    calcular a poupança mensal.
+                </span>
             </div>
         `;
-
-
-        open('dynamicModal');
-
-
-        const form =
-            modal.querySelector(
-                '#dynamicForm'
-            );
-
-
-        if (form) {
-
-            form.addEventListener(
-                'submit',
-                handleDynamicFormSubmit
-            );
-        }
-
-
-        const saveButton =
-            form?.querySelector(
-                '[data-save-form]'
-            );
-
-
-        if (saveButton) {
-
-            saveButton.addEventListener(
-                'click',
-                event => {
-
-                    event.preventDefault();
-
-                    if (
-                        typeof form.requestSubmit ===
-                        'function'
-                    ) {
-
-                        form.requestSubmit();
-
-                    } else {
-
-                        handleDynamicFormSubmit(
-                            new Event('submit', {
-                                bubbles: true,
-                                cancelable: true
-                            })
-                        );
-                    }
-                }
-            );
-        }
     }
 
+    if (plan.status === 'complete') {
+        return `
+            <div class="goal-plan">
+                <strong class="positive">
+                    Objetivo alcançado! ✓
+                </strong>
+            </div>
+        `;
+    }
 
-    const formActions = `
-        <div class="form-actions">
+    if (plan.status === 'date') {
+        return `
+            <div class="goal-plan">
+                <span>
+                    Falta juntar ${money(plan.remaining)}.
+                </span>
+                <small>
+                    Define uma data limite para
+                    calcular a poupança mensal.
+                </small>
+            </div>
+        `;
+    }
 
-            <button
-                type="button"
-                class="secondary-button"
-                data-action="close-dynamic"
-            >
-                Cancelar
-            </button>
+    if (plan.status === 'overdue') {
+        return `
+            <div class="goal-plan">
+                <strong>Prazo terminado</strong>
+                <span>
+                    Falta juntar ${money(plan.remaining)}.
+                </span>
+                <small>
+                    Atualiza a data limite para refazer o plano.
+                </small>
+            </div>
+        `;
+    }
 
-            <button
-                type="submit"
-                class="primary-button"
-                data-save-form
-            >
-                Guardar
-            </button>
+    return `
+        <div class="goal-plan">
+            <span>Poupança mensal recomendada</span>
 
+            <strong>
+                ${money(plan.monthly)}
+                <small> / mês</small>
+            </strong>
+
+            <small>
+                Falta juntar ${money(plan.remaining)}
+                em ${plan.months}
+                ${plan.months === 1 ? 'mês' : 'meses'},
+                incluindo este mês.
+            </small>
         </div>
     `;
 
+}
 
-    /* =========================================================
-       SELETOR VISUAL DE CATEGORIAS
-       ========================================================= */
 
-    function categoryPicker(selected) {
+function updateGoalPreview(form) {
 
-        const current =
-            normalizeCategory(
-                selected || 'Outros'
-            );
-
-
-        return `
-            <div class="category-picker">
-
-                <input
-                    type="hidden"
-                    name="category"
-                    id="expenseCategoryValue"
-                    value="${esc(current)}"
-                >
-
-                <div class="category-picker-grid">
-
-                    ${Object.keys(CATEGORY_DATA)
-                        .map(category => {
-
-                            const active =
-                                category === current
-                                    ? 'selected'
-                                    : '';
-
-                            return `
-                                <button
-                                    type="button"
-                                    class="
-                                        category-choice
-                                        ${active}
-                                    "
-                                    data-category-choice="${esc(category)}"
-                                >
-
-                                    ${categoryIcon(
-                                        category
-                                    )}
-
-                                    <span>
-                                        ${esc(category)}
-                                    </span>
-
-                                </button>
-                            `;
-
-                        })
-                        .join('')}
-
-                </div>
-
-            </div>
-        `;
-    }
-
-
-    /* =========================================================
-       FORMULÁRIOS
-       ========================================================= */
-
-    function dynamicForm(
-        kind,
-        item = {}
-    ) {
-
-        if (kind === 'expense') {
-
-            const category =
-                normalizeCategory(
-                    item.category ||
-                    'Alimentação'
-                );
-
-
-            return `
-                <form
-                    id="dynamicForm"
-                    novalidate
-                >
-
-                    <input
-                        type="hidden"
-                        name="kind"
-                        value="expense"
-                    >
-
-                    <input
-                        type="hidden"
-                        name="id"
-                        value="${esc(item.id || '')}"
-                    >
-
-                    <label>
-                        Valor
-
-                        <input
-                            name="amount"
-                            type="number"
-                            min="0.01"
-                            step="0.01"
-                            inputmode="decimal"
-                            value="${item.amount || ''}"
-                            placeholder="0,00"
-                            required
-                            autocomplete="off"
-                        >
-                    </label>
-
-                    <label>
-                        Categoria
-                    </label>
-
-                    ${categoryPicker(category)}
-
-                    <label>
-                        Descrição
-
-                        <input
-                            name="description"
-                            type="text"
-                            value="${esc(
-                                item.description || ''
-                            )}"
-                            placeholder="Ex.: supermercado"
-                            autocomplete="off"
-                        >
-                    </label>
-
-                    <label>
-                        Data
-
-                        <input
-                            name="date"
-                            type="date"
-                            value="${item.date || today()}"
-                            required
-                        >
-                    </label>
-
-                    ${formActions}
-
-                </form>
-            `;
-        }
-
-
-        if (kind === 'debt') {
-
-            return `
-                <form
-                    id="dynamicForm"
-                    novalidate
-                >
-
-                    <input
-                        type="hidden"
-                        name="kind"
-                        value="debt"
-                    >
-
-                    <input
-                        type="hidden"
-                        name="id"
-                        value="${esc(item.id || '')}"
-                    >
-
-                    <label>
-                        Nome
-
-                        <input
-                            name="name"
-                            type="text"
-                            value="${esc(item.name || '')}"
-                            placeholder="Ex.: Crédito pessoal"
-                            required
-                        >
-                    </label>
-
-                    <label>
-                        Valor total
-
-                        <input
-                            name="total"
-                            type="number"
-                            min="0.01"
-                            step="0.01"
-                            inputmode="decimal"
-                            value="${item.total || ''}"
-                            placeholder="0,00"
-                            required
-                        >
-                    </label>
-
-                    <label>
-                        Pagamento mensal
-
-                        <input
-                            name="monthly"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            inputmode="decimal"
-                            value="${item.monthly || ''}"
-                            placeholder="0,00"
-                        >
-                    </label>
-
-                    ${formActions}
-
-                </form>
-            `;
-        }
-
-
-        if (kind === 'payment') {
-
-            const remaining =
-                debtBalance(item);
-
-
-            const suggested =
-                Math.min(
-                    Number(item.monthly || 0),
-                    remaining
-                );
-
-
-            return `
-                <form
-                    id="dynamicForm"
-                    novalidate
-                >
-
-                    <input
-                        type="hidden"
-                        name="kind"
-                        value="payment"
-                    >
-
-                    <input
-                        type="hidden"
-                        name="debtId"
-                        value="${esc(item.id)}"
-                    >
-
-                    <p class="muted">
-                        Em dívida:
-                        <strong>
-                            ${money.format(remaining)}
-                        </strong>
-                    </p>
-
-                    <label>
-                        Valor do pagamento
-
-                        <input
-                            name="amount"
-                            type="number"
-                            min="0.01"
-                            max="${remaining}"
-                            step="0.01"
-                            inputmode="decimal"
-                            value="${suggested || ''}"
-                            required
-                        >
-                    </label>
-
-                    <label>
-                        Data
-
-                        <input
-                            name="date"
-                            type="date"
-                            value="${today()}"
-                            required
-                        >
-                    </label>
-
-                    ${formActions}
-
-                </form>
-            `;
-        }
-
-
-        if (kind === 'fund') {
-
-            return `
-                <form
-                    id="dynamicForm"
-                    novalidate
-                >
-
-                    <input
-                        type="hidden"
-                        name="kind"
-                        value="fund"
-                    >
-
-                    <input
-                        type="hidden"
-                        name="id"
-                        value="${esc(item.id || '')}"
-                    >
-
-                    <label>
-                        Tipo
-
-                        <select name="type">
-
-                            <option
-                                value="add"
-                                ${item.type !== 'remove'
-                                    ? 'selected'
-                                    : ''}
-                            >
-                                Adicionar ao fundo
-                            </option>
-
-                            <option
-                                value="remove"
-                                ${item.type === 'remove'
-                                    ? 'selected'
-                                    : ''}
-                            >
-                                Levantar do fundo
-                            </option>
-
-                        </select>
-
-                    </label>
-
-                    <label>
-                        Valor
-
-                        <input
-                            name="amount"
-                            type="number"
-                            min="0.01"
-                            step="0.01"
-                            inputmode="decimal"
-                            value="${item.amount || ''}"
-                            placeholder="0,00"
-                            required
-                        >
-                    </label>
-
-                    <label>
-                        Data
-
-                        <input
-                            name="date"
-                            type="date"
-                            value="${item.date || today()}"
-                            required
-                        >
-                    </label>
-
-                    ${formActions}
-
-                </form>
-            `;
-        }
-
-
-        if (kind === 'goal') {
-
-            return `
-                <form
-                    id="dynamicForm"
-                    novalidate
-                >
-
-                    <input
-                        type="hidden"
-                        name="kind"
-                        value="goal"
-                    >
-
-                    <input
-                        type="hidden"
-                        name="id"
-                        value="${esc(item.id || '')}"
-                    >
-
-                    <label>
-                        Nome do objetivo
-
-                        <input
-                            name="name"
-                            type="text"
-                            value="${esc(item.name || '')}"
-                            placeholder="Ex.: Viagem"
-                            required
-                        >
-                    </label>
-
-                    <label>
-                        Meta
-
-                        <input
-                            name="target"
-                            type="number"
-                            min="1"
-                            step="0.01"
-                            inputmode="decimal"
-                            value="${item.target || ''}"
-                            placeholder="1000"
-                            required
-                        >
-                    </label>
-
-                    <label>
-                        Já poupado
-
-                        <input
-                            name="saved"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            inputmode="decimal"
-                            value="${item.saved || 0}"
-                        >
-                    </label>
-
-                    <label>
-                        Nota
-
-                        <input
-                            name="note"
-                            type="text"
-                            value="${esc(item.note || '')}"
-                            placeholder="Ex.: Férias"
-                        >
-                    </label>
-
-                    ${formActions}
-
-                </form>
-            `;
-        }
-
-
-        if (kind === 'goaladd') {
-
-            return `
-                <form
-                    id="dynamicForm"
-                    novalidate
-                >
-
-                    <input
-                        type="hidden"
-                        name="kind"
-                        value="goaladd"
-                    >
-
-                    <input
-                        type="hidden"
-                        name="id"
-                        value="${esc(item.id)}"
-                    >
-
-                    <label>
-                        Quanto queres adicionar?
-
-                        <input
-                            name="amount"
-                            type="number"
-                            min="0.01"
-                            step="0.01"
-                            inputmode="decimal"
-                            placeholder="0,00"
-                            required
-                        >
-                    </label>
-
-                    <label>
-                        Data
-
-                        <input
-                            name="date"
-                            type="date"
-                            value="${today()}"
-                            required
-                        >
-                    </label>
-
-                    <p class="form-note">
-                        Este valor é considerado dinheiro poupado
-                        e reduz o saldo disponível deste mês.
-                    </p>
-
-                    ${formActions}
-
-                </form>
-            `;
-        }
-
-
-        return `
-            <form
-                id="dynamicForm"
-                novalidate
-            >
-
-                <input
-                    type="hidden"
-                    name="kind"
-                    value="subscription"
-                >
-
-                <input
-                    type="hidden"
-                    name="id"
-                    value="${esc(item.id || '')}"
-                >
-
-                <label>
-                    Nome
-
-                    <input
-                        name="name"
-                        type="text"
-                        value="${esc(item.name || '')}"
-                        placeholder="Ex.: Spotify"
-                        required
-                    >
-                </label>
-
-                <label>
-                    Valor mensal
-
-                    <input
-                        name="amount"
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        inputmode="decimal"
-                        value="${item.amount || ''}"
-                        placeholder="0,00"
-                        required
-                    >
-                </label>
-
-                <label>
-                    Próxima cobrança
-
-                    <input
-                        name="date"
-                        type="date"
-                        value="${item.date || today()}"
-                        required
-                    >
-                </label>
-
-                ${formActions}
-
-            </form>
-        `;
-    }
-
-
-    /* =========================================================
-       GRAVAÇÃO DO FORMULÁRIO DINÂMICO
-       ========================================================= */
-
-    function handleDynamicFormSubmit(event) {
-
-        event.preventDefault();
-
-        event.stopPropagation();
-
-
-        const form =
-            event.currentTarget ||
-            event.target;
-
-
-        if (!form) {
-            return;
-        }
-
-
-        const formData =
-            new FormData(form);
-
-
-        const data =
-            Object.fromEntries(
-                formData.entries()
-            );
-
-
-        const kind =
-            String(
-                data.kind || ''
-            );
-
-
-        if (kind === 'expense') {
-
-            const amount =
-                positiveNumber(
-                    data.amount
-                );
-
-
-            const category =
-                normalizeCategory(
-                    data.category
-                );
-
-
-            const description =
-                String(
-                    data.description || ''
-                ).trim();
-
-
-            const date =
-                String(
-                    data.date || ''
-                ).trim();
-
-
-            if (!amount) {
-
-                showToast(
-                    'Indica um valor válido.'
-                );
-
-                return;
-            }
-
-
-            if (!date) {
-
-                showToast(
-                    'Indica uma data.'
-                );
-
-                return;
-            }
-
-
-            const id =
-                String(
-                    data.id || ''
-                );
-
-
-            const existingIndex =
-                state.expenses.findIndex(
-                    expense =>
-                        expense.id === id
-                );
-
-
-            const expense = {
-
-                id:
-                    id ||
-                    uid(),
-
-                amount,
-
-                category,
-
-                description,
-
-                date
-
-            };
-
-
-            if (existingIndex >= 0) {
-
-                state.expenses[
-                    existingIndex
-                ] = expense;
-
-            } else {
-
-                state.expenses.push(
-                    expense
-                );
-            }
-
-
-            save();
-
-            close(
-                'dynamicModal'
-            );
-
-            render();
-
-            showToast(
-                existingIndex >= 0
-                    ? 'Despesa atualizada.'
-                    : 'Despesa guardada.'
-            );
-
-            return;
-        }
-
-
-        if (kind === 'debt') {
-
-            const name =
-                String(
-                    data.name || ''
-                ).trim();
-
-
-            const total =
-                positiveNumber(
-                    data.total
-                );
-
-
-            const monthly =
-                Math.max(
-                    0,
-                    Number(
-                        String(
-                            data.monthly || 0
-                        ).replace(',', '.')
-                    )
-                );
-
-
-            if (!name) {
-
-                showToast(
-                    'Indica o nome da dívida.'
-                );
-
-                return;
-            }
-
-
-            if (!total) {
-
-                showToast(
-                    'Indica o valor total da dívida.'
-                );
-
-                return;
-            }
-
-
-            const id =
-                String(
-                    data.id || ''
-                );
-
-
-            const existing =
-                state.debts.find(
-                    debt =>
-                        debt.id === id
-                );
-
-
-            const debt = {
-
-                id:
-                    id ||
-                    uid(),
-
-                name,
-
-                total,
-
-                monthly,
-
-                payments:
-                    existing?.payments ||
-                    []
-
-            };
-
-
-            const index =
-                state.debts.findIndex(
-                    item =>
-                        item.id === debt.id
-                );
-
-
-            if (index >= 0) {
-
-                state.debts[index] =
-                    debt;
-
-            } else {
-
-                state.debts.push(
-                    debt
-                );
-            }
-
-
-            save();
-
-            close(
-                'dynamicModal'
-            );
-
-            render();
-
-            showToast(
-                index >= 0
-                    ? 'Dívida atualizada.'
-                    : 'Dívida guardada.'
-            );
-
-            return;
-        }
-
-
-        if (kind === 'payment') {
-
-            const debt =
-                state.debts.find(
-                    item =>
-                        item.id ===
-                        data.debtId
-                );
-
-
-            if (!debt) {
-
-                showToast(
-                    'Dívida não encontrada.'
-                );
-
-                return;
-            }
-
-
-            const amount =
-                positiveNumber(
-                    data.amount
-                );
-
-
-            const remaining =
-                debtBalance(
-                    debt
-                );
-
-
-            if (!amount) {
-
-                showToast(
-                    'Indica um valor válido.'
-                );
-
-                return;
-            }
-
-
-            if (amount > remaining) {
-
-                showToast(
-                    'O pagamento não pode ser superior ao valor em dívida.'
-                );
-
-                return;
-            }
-
-
-            debt.payments =
-                Array.isArray(
-                    debt.payments
-                )
-                    ? debt.payments
-                    : [];
-
-
-            debt.payments.push({
-
-                id: uid(),
-
-                amount,
-
-                date:
-                    data.date ||
-                    today()
-
-            });
-
-
-            save();
-
-            close(
-                'dynamicModal'
-            );
-
-            render();
-
-            showToast(
-                'Pagamento registado.'
-            );
-
-            return;
-        }
-
-
-        if (kind === 'fund') {
-
-            const amount =
-                positiveNumber(
-                    data.amount
-                );
-
-
-            const type =
-                data.type === 'remove'
-                    ? 'remove'
-                    : 'add';
-
-
-            const date =
-                data.date ||
-                today();
-
-
-            if (!amount) {
-
-                showToast(
-                    'Indica um valor válido.'
-                );
-
-                return;
-            }
-
-
-            const id =
-                String(
-                    data.id || ''
-                );
-
-
-            let availableFund;
-
-
-            if (id) {
-
-                availableFund =
-                    fundBalanceWithout(id);
-
-            } else {
-
-                availableFund =
-                    fundBalance();
-            }
-
-
-            if (
-                type === 'remove' &&
-                amount > availableFund
-            ) {
-
-                showToast(
-                    'Não podes levantar mais dinheiro do que tens no fundo.'
-                );
-
-                return;
-            }
-
-
-            const movement = {
-
-                id:
-                    id ||
-                    uid(),
-
-                type,
-
-                amount,
-
-                date
-
-            };
-
-
-            const index =
-                state.fund.findIndex(
-                    item =>
-                        item.id ===
-                        movement.id
-                );
-
-
-            if (index >= 0) {
-
-                state.fund[index] =
-                    movement;
-
-            } else {
-
-                state.fund.push(
-                    movement
-                );
-            }
-
-
-            save();
-
-            close(
-                'dynamicModal'
-            );
-
-            render();
-
-            showToast(
-                'Movimento do fundo guardado.'
-            );
-
-            return;
-        }
-
-
-        if (kind === 'goal') {
-
-            const name =
-                String(
-                    data.name || ''
-                ).trim();
-
-
-            const target =
-                positiveNumber(
-                    data.target
-                );
-
-
-            const saved =
-                Math.max(
-                    0,
-                    Number(
-                        String(
-                            data.saved || 0
-                        ).replace(',', '.')
-                    )
-                );
-
-
-            if (!name) {
-
-                showToast(
-                    'Indica o nome do objetivo.'
-                );
-
-                return;
-            }
-
-
-            if (!target) {
-
-                showToast(
-                    'Indica o valor da meta.'
-                );
-
-                return;
-            }
-
-
-            const id =
-                String(
-                    data.id || ''
-                );
-
-
-            const existing =
-                state.goals.find(
-                    goal =>
-                        goal.id === id
-                );
-
-
-            const goal = {
-
-                id:
-                    id ||
-                    uid(),
-
-                name,
-
-                target,
-
-                saved,
-
-                note:
-                    String(
-                        data.note || ''
-                    ).trim(),
-
-                contributions:
-                    existing?.contributions ||
-                    []
-
-            };
-
-
-            const index =
-                state.goals.findIndex(
-                    item =>
-                        item.id ===
-                        goal.id
-                );
-
-
-            if (index >= 0) {
-
-                state.goals[index] =
-                    goal;
-
-            } else {
-
-                state.goals.push(
-                    goal
-                );
-            }
-
-
-            save();
-
-            close(
-                'dynamicModal'
-            );
-
-            render();
-
-            showToast(
-                'Objetivo guardado.'
-            );
-
-            return;
-        }
-
-
-        if (kind === 'goaladd') {
-
-            const goal =
-                state.goals.find(
-                    item =>
-                        item.id ===
-                        data.id
-                );
-
-
-            if (!goal) {
-
-                showToast(
-                    'Objetivo não encontrado.'
-                );
-
-                return;
-            }
-
-
-            const amount =
-                positiveNumber(
-                    data.amount
-                );
-
-
-            if (!amount) {
-
-                showToast(
-                    'Indica um valor válido.'
-                );
-
-                return;
-            }
-
-
-            goal.saved =
-                Number(
-                    goal.saved || 0
-                ) + amount;
-
-
-            if (
-                !Array.isArray(
-                    goal.contributions
-                )
-            ) {
-
-                goal.contributions = [];
-            }
-
-
-            goal.contributions.push({
-
-                id: uid(),
-
-                amount,
-
-                date:
-                    data.date ||
-                    today()
-
-            });
-
-
-            save();
-
-            close(
-                'dynamicModal'
-            );
-
-            render();
-
-            showToast(
-                'Dinheiro adicionado ao objetivo.'
-            );
-
-            return;
-        }
-
-
-        if (kind === 'subscription') {
-
-            const name =
-                String(
-                    data.name || ''
-                ).trim();
-
-
-            const amount =
-                positiveNumber(
-                    data.amount
-                );
-
-
-            const date =
-                data.date ||
-                today();
-
-
-            if (!name) {
-
-                showToast(
-                    'Indica o nome da subscrição.'
-                );
-
-                return;
-            }
-
-
-            if (!amount) {
-
-                showToast(
-                    'Indica o valor da subscrição.'
-                );
-
-                return;
-            }
-
-
-            const id =
-                String(
-                    data.id || ''
-                );
-
-
-            const subscription = {
-
-                id:
-                    id ||
-                    uid(),
-
-                name,
-
-                amount,
-
-                date
-
-            };
-
-
-            const index =
-                state.subscriptions.findIndex(
-                    item =>
-                        item.id ===
-                        subscription.id
-                );
-
-
-            if (index >= 0) {
-
-                state.subscriptions[index] =
-                    subscription;
-
-            } else {
-
-                state.subscriptions.push(
-                    subscription
-                );
-            }
-
-
-            save();
-
-            close(
-                'dynamicModal'
-            );
-
-            render();
-
-            showToast(
-                'Subscrição guardada.'
-            );
-
-            return;
-        }
-
-
-        showToast(
-            'Não foi possível identificar o formulário.'
-        );
-    }
-
-
-    /* =========================================================
-       CHAT
-       ========================================================= */
-
-    function parseMoney(text) {
-
-        let value =
-            String(
-                text || ''
-            )
-                .replace(/\s/g, '')
-                .replace(/€/g, '');
-
-
-        const match =
-            value.match(
-                /(?:\d{1,3}(?:\.\d{3})+|\d+)(?:[.,]\d{1,2})?/
-            );
-
-
-        if (!match) {
-            return null;
-        }
-
-
-        let number =
-            match[0];
-
-
-        if (
-            number.includes('.') &&
-            number.includes(',')
-        ) {
-
-            number =
-                number
-                    .replace(/\./g, '')
-                    .replace(',', '.');
-
-        } else if (
-            number.includes(',')
-        ) {
-
-            number =
-                number.replace(',', '.');
-
-        } else if (
-            /^\d{1,3}(?:\.\d{3})+$/.test(
-                number
-            )
-        ) {
-
-            number =
-                number.replace(/\./g, '');
-        }
-
-
-        const result =
-            Number(number);
-
-
-        return Number.isFinite(result)
-            ? result
-            : null;
-    }
-
-
-    function answerQuestion(question) {
-
-        const text =
-            String(
-                question || ''
-            )
-                .toLowerCase()
-                .trim();
-
-
-        const plan =
-            spendingPlan();
-
-
-        if (state.salary <= 0) {
-
-            return (
-                'Primeiro define o teu salário mensal ' +
-                'em Definições. Depois a Aurea consegue ' +
-                'calcular a tua margem corretamente.'
-            );
-        }
-
-
-        const amount =
-            parseMoney(question);
-
-
-        if (
-            text.includes('posso gastar') &&
-            amount !== null
-        ) {
-
-            const free =
-                Math.max(
-                    0,
-                    plan.freeAmount
-                );
-
-
-            const days =
-                Math.max(
-                    1,
-                    plan.daysRemaining
-                );
-
-
-            const after =
-                free - amount;
-
-
-            const dailyAfter =
-                Math.max(
-                    0,
-                    after
-                ) / days;
-
-
-            const share =
-                free > 0
-                    ? amount / free
-                    : 1;
-
-
-            if (amount > free) {
-
-                return (
-                    `Não cabe no dinheiro livre atual. ` +
-                    `${money.format(amount)} ultrapassa ` +
-                    `a margem livre em ` +
-                    `${money.format(amount - free)}. ` +
-                    `Tens ${money.format(free)} livres ` +
-                    `e ${money.format(plan.protectedAmount)} protegidos.`
-                );
-            }
-
-
-            if (share >= 0.75) {
-
-                return (
-                    `Cabe matematicamente na margem livre, ` +
-                    `mas consome cerca de ${Math.round(
-                        share * 100
-                    )}% do teu dinheiro livre. ` +
-                    `Depois ficarias com ${money.format(
-                        after
-                    )}, cerca de ${money.format(
-                        dailyAfter
-                    )}/dia para o resto do mês.`
-                );
-            }
-
-
-            if (share >= 0.5) {
-
-                return (
-                    `Cabe dentro da margem livre, mas é um ` +
-                    `gasto relevante. Depois ficarias com ` +
-                    `${money.format(after)} para o resto do mês, ` +
-                    `cerca de ${money.format(
-                        dailyAfter
-                    )}/dia.`
-                );
-            }
-
-
-            return (
-                `Sim, cabe na margem livre atual. ` +
-                `Depois ficariam ${money.format(
-                    after
-                )} livres para o resto do mês.`
-            );
-        }
-
-
-        if (
-            text.includes('quanto posso gastar') ||
-            text.includes('quanto posso')
-        ) {
-
-            const daily =
-                plan.maxSpend /
-                Math.max(
-                    1,
-                    plan.daysRemaining
-                );
-
-
-            return (
-                `Tens ${money.format(
-                    plan.balance
-                )} disponíveis. A Aurea protege ` +
-                `${money.format(
-                    plan.protectedAmount
-                )} e considera ` +
-                `${money.format(
-                    plan.maxSpend
-                )} como dinheiro livre. ` +
-                `Isto corresponde a cerca de ` +
-                `${money.format(
-                    daily
-                )}/dia.`
-            );
-        }
-
-
-        if (
-            text.includes('reserva') ||
-            text.includes('deixar')
-        ) {
-
-            return (
-                `Neste momento a margem protegida é ` +
-                `${money.format(
-                    plan.protectedAmount
-                )}, equivalente a ` +
-                `${Math.round(
-                    plan.rate * 100
-                )}% do saldo disponível.`
-            );
-        }
-
-
-        if (
-            text.includes('recomend')
-        ) {
-
-            return recommendationText();
-        }
-
-
-        return (
-            'Posso ajudar-te com perguntas como: ' +
-            '“Quanto posso gastar?”, ' +
-            '“Posso gastar 50€?” ou ' +
-            '“Quanto devo deixar de reserva?”.'
-        );
-    }
-
-
-    function addChatMessage(
-        message,
-        who = 'aurea'
-    ) {
-
-        const box =
-            $('chatMessages');
-
-
-        if (!box) {
-            return;
-        }
-
-
-        const element =
-            document.createElement('div');
-
-
-        element.className =
-            `chat-message ${who}`;
-
-
-        element.textContent =
-            message;
-
-
-        box.appendChild(
-            element
-        );
-
-
-        box.scrollTop =
-            box.scrollHeight;
-    }
-
-
-    function openChat() {
-
-        open('chatOverlay');
-
-
-        const box =
-            $('chatMessages');
-
-
-        if (
-            box &&
-            !box.children.length
-        ) {
-
-            addChatMessage(
-                'Olá. Posso ajudar-te a perceber quanto tens disponível, quanto tens livre e qual a margem protegida para hoje.'
-            );
-        }
-
-
-        setTimeout(() => {
-
-            $('chatInput')?.focus();
-
-        }, 120);
-    }
-
-
-    /* =========================================================
-       EXPORTAÇÃO
-       ========================================================= */
-
-    function exportPdf() {
-
-        const report =
-            $('printReport');
-
-
-        if (!report) {
-            return;
-        }
-
-
-        const rows = [
-
-            ...monthExpenses().map(
-                item => ({
-                    date: item.date,
-                    label:
-                        item.description ||
-                        normalizeCategory(
-                            item.category
-                        ),
-                    amount:
-                        -Number(item.amount)
-                })
-            ),
-
-            ...monthPayments().map(
-                item => ({
-                    date: item.date,
-                    label:
-                        `Pagamento · ${item.debtName}`,
-                    amount:
-                        -Number(item.amount)
-                })
-            ),
-
-            ...monthFund().map(
-                item => ({
-                    date: item.date,
-                    label:
-                        item.type === 'add'
-                            ? 'Fundo · reforço'
-                            : 'Fundo · levantamento',
-                    amount:
-                        item.type === 'add'
-                            ? -Number(item.amount)
-                            : Number(item.amount)
-                })
-            ),
-
-            ...monthGoals().map(
-                item => ({
-                    date: item.date,
-                    label:
-                        `Objetivo · ${item.goalName}`,
-                    amount:
-                        -Number(item.amount)
-                })
-            )
-
-        ].sort(
-            (a, b) =>
-                b.date.localeCompare(a.date)
-        );
-
-
-        const label =
-            new Intl.DateTimeFormat(
-                'pt-PT',
-                {
-                    month: 'long',
-                    year: 'numeric'
-                }
-            ).format(
-                new Date(
-                    `${currentMonth}-01T12:00:00`
-                )
-            );
-
-
-        const out =
-            sum(
-                rows,
-                item =>
-                    item.amount < 0
-                        ? -item.amount
-                        : 0
-            );
-
-
-        report.innerHTML = `
-            <div class="print-report-header">
-
-                <div>
-
-                    <p>
-                        AUREA FINANÇAS
-                    </p>
-
-                    <h1>
-                        Relatório mensal
-                    </h1>
-
-                    <span>
-                        ${esc(label)}
-                    </span>
-
-                </div>
-
-                <strong>
-                    ${money.format(
-                        available(currentMonth)
-                    )}
-                </strong>
-
-            </div>
-
-
-            <div class="print-report-metrics">
-
-                <div>
-                    <span>Salário</span>
-                    <b>
-                        ${money.format(state.salary)}
-                    </b>
-                </div>
-
-                <div>
-                    <span>Saídas</span>
-                    <b>
-                        ${money.format(out)}
-                    </b>
-                </div>
-
-                <div>
-                    <span>Disponível</span>
-                    <b>
-                        ${money.format(
-                            available(currentMonth)
-                        )}
-                    </b>
-                </div>
-
-            </div>
-
-
-            <h2>
-                Movimentos
-            </h2>
-
-
-            ${
-                rows.length
-                    ? `
-                        <table>
-
-                            <thead>
-
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Descrição</th>
-                                    <th>Valor</th>
-                                </tr>
-
-                            </thead>
-
-                            <tbody>
-
-                                ${rows.map(item => `
-                                    <tr>
-
-                                        <td>
-                                            ${esc(item.date)}
-                                        </td>
-
-                                        <td>
-                                            ${esc(item.label)}
-                                        </td>
-
-                                        <td
-                                            class="${
-                                                item.amount >= 0
-                                                    ? 'in'
-                                                    : 'out'
-                                            }"
-                                        >
-                                            ${
-                                                item.amount >= 0
-                                                    ? '+'
-                                                    : ''
-                                            }
-
-                                            ${money.format(
-                                                item.amount
-                                            )}
-                                        </td>
-
-                                    </tr>
-                                `).join('')}
-
-                            </tbody>
-
-                        </table>
-                    `
-                    : `
-                        <p>
-                            Sem movimentos neste mês.
-                        </p>
-                    `
-            }
-
-
-            <footer>
-                Gerado pela Aurea Finanças
-                · Desenvolvido por Carlos Sá
-            </footer>
-        `;
-
-
-        window.print();
-    }
-
-
-    /* =========================================================
-       CLIQUES
-       ========================================================= */
-
-    document.addEventListener(
-        'click',
-        event => {
-
-            const categoryButton =
-                event.target.closest(
-                    '[data-category-choice]'
-                );
-
-
-            if (categoryButton) {
-
-                event.preventDefault();
-
-
-                const category =
-                    categoryButton.dataset
-                        .categoryChoice;
-
-
-                const input =
-                    $('expenseCategoryValue');
-
-
-                if (input) {
-
-                    input.value =
-                        category;
-                }
-
-
-                document
-                    .querySelectorAll(
-                        '[data-category-choice]'
-                    )
-                    .forEach(button => {
-
-                        button.classList.toggle(
-                            'selected',
-                            button ===
-                            categoryButton
-                        );
-                    });
-
-
-                return;
-            }
-
-
-            const button =
-                event.target.closest(
-                    '[data-action]'
-                );
-
-
-            if (!button) {
-                return;
-            }
-
-
-            const action =
-                button.dataset.action;
-
-
-            const id =
-                button.dataset.id;
-
-
-            event.preventDefault();
-
-            if (action === 'toggle-more') {
-
-    const moreMenu =
-        $('mobileMoreMenu');
-
-
-    const moreButton =
-        document.querySelector(
-            '.mobile-more-button'
-        );
-
-
-    if (!moreMenu) {
+    if (!(form instanceof HTMLFormElement)) {
         return;
     }
 
-
-    const isOpen =
-        moreMenu.classList.contains(
-            'open'
-        );
-
-
-    moreMenu.classList.toggle(
-        'open',
-        !isOpen
+    const preview = form.querySelector(
+        '#goalPlanPreview'
     );
 
-
-    if (moreButton) {
-
-        moreButton.setAttribute(
-            'aria-expanded',
-            String(!isOpen)
-        );
-
+    if (!preview) {
+        return;
     }
 
+    const data = Object.fromEntries(
+        new FormData(form).entries()
+    );
 
-    return;
+    const goal = state.goals.find(
+        g => g.id === data.id
+    );
+
+    preview.innerHTML = goalPlanMarkup({
+        target: positiveNumber(data.target),
+
+        saved:
+            positiveNumber(data.saved) +
+            sum(goal?.contributions, c => c.amount),
+
+        date: data.date || ''
+    });
+
 }
 
-/* =========================================================
-   FECHAR MENU MAIS AO CLICAR FORA
-   ========================================================= */
+const INCOME_ICONS = {
+  'Salário':
+    '<rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V3h8v4M3 12a22 22 0 0 0 18 0M12 11v3"/>',
 
+  'Freelance':
+    '<rect x="4" y="3" width="16" height="12" rx="2"/><path d="M2 20h20l-2-5H4zM9 7l-2 2 2 2M15 7l2 2-2 2"/>',
 
-            if (action === 'navigate') {
+  'Extra':
+    '<circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/>',
 
-                navigate(
-                    button.dataset.section
-                );
+  'Prémio':
+    '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v9h14v-9M12 8v13M12 8H8a3 3 0 1 1 3-3l1 3ZM12 8h4a3 3 0 1 0-3-3l-1 3Z"/>',
 
-                return;
+  'Outro':
+    '<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 7V5a2 2 0 0 1 2-2h13v3M16 11h5v5h-5z"/>'
+};
+
+function incomeIcon(type) {
+  return `
+    <div class="category-icon income-icon">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        ${INCOME_ICONS[type] || INCOME_ICONS.Outro}
+      </svg>
+    </div>
+  `;
+}
+
+function iconSelect(label, name, options, value) {
+  const selected = options.includes(value) ? value : options[0];
+  const iconFor = name === 'category' ? categoryIcon : incomeIcon;
+
+  return `
+    <div class="icon-select">
+      <span class="icon-select-label">${esc(label)}</span>
+
+      <details>
+        <summary>
+          <span class="icon-selection" data-selected-icon>
+            ${iconFor(selected)}
+            <span>${esc(selected)}</span>
+          </span>
+          <span aria-hidden="true">⌄</span>
+        </summary>
+
+        <fieldset class="icon-options">
+          <legend class="sr-only">${esc(label)}</legend>
+
+          ${options.map(option => `
+            <label class="icon-option">
+              <input
+                type="radio"
+                name="${esc(name)}"
+                value="${esc(option)}"
+                data-icon-option
+                ${option === selected ? 'checked' : ''}
+              >
+              ${iconFor(option)}
+              <span>${esc(option)}</span>
+            </label>
+          `).join('')}
+        </fieldset>
+      </details>
+    </div>
+  `;
+}
+
+function updateIconSelect(input) {
+  const details = input.closest('.icon-select details');
+  if (!details) return;
+
+  const iconFor = input.name === 'category' ? categoryIcon : incomeIcon;
+
+  details.querySelector('[data-selected-icon]').innerHTML =
+    iconFor(input.value) + `<span>${esc(input.value)}</span>`;
+
+  details.open = false;
+  details.querySelector('summary').focus();
+}
+
+function dynamicForm(kind,id=null,extra={}){
+    const lists={
+        income:state.incomes,
+        expense:state.expenses,
+        debt:state.debts,
+        fund:state.fund,
+        subscription:state.subscriptions,
+        goal:state.goals
+    };
+
+    const debt=state.debts.find(
+        x=>x.id===extra.debtId
+    );
+
+    const goal=state.goals.find(
+        x=>x.id===extra.goalId
+    );
+
+    const item=(
+        kind==='payment'
+            ?debt?.payments
+            :kind==='contribution'
+                ?goal?.contributions
+                :lists[kind]
+    )?.find(x=>x.id===id);
+
+    if(
+        (id&&!item)||
+        (kind==='payment'&&!debt)||
+        (kind==='contribution'&&!goal)
+    ){
+        showToast('Registo não encontrado.');
+        return;
+    }
+
+    const names={
+        income:'receita',
+        expense:'despesa',
+        debt:'dívida',
+        payment:'pagamento',
+        fund:'movimento',
+        subscription:'subscrição',
+        goal:'objetivo',
+        contribution:'contribuição'
+    };
+
+    const title=kind==='fundTarget'
+        ?'Definir meta do fundo'
+        :`${item?'Editar':'Registar'} ${names[kind]||''}`;
+
+    const input=(
+        label,
+        name,
+        value='',
+        type='text',
+        attrs=''
+    )=>`
+        <label>
+            ${label}
+            <input
+                type="${type}"
+                name="${name}"
+                value="${esc(value)}"
+                ${attrs}
+            >
+        </label>
+    `;
+
+    const amount=(
+        label,
+        name,
+        value='',
+        min='0.01',
+        attrs=''
+    )=>input(
+        label,
+        name,
+        value,
+        'number',
+        `min="${min}" step="0.01" required ${attrs}`
+    );
+
+    const date=(value=today())=>input(
+        'Data',
+        'date',
+        value,
+        'date',
+        'required'
+    );
+
+    const select=(
+        label,
+        name,
+        options,
+        value
+    )=>`
+        <label>
+            ${label}
+            <select name="${name}">
+                ${options.map(([v,n])=>`
+                    <option
+                        value="${esc(v)}"
+                        ${v===value?'selected':''}
+                    >${esc(n)}</option>
+                `).join('')}
+            </select>
+        </label>
+    `;
+
+    let fields=`
+        <input
+            type="hidden"
+            name="kind"
+            value="${esc(kind)}"
+        >
+        <input
+            type="hidden"
+            name="id"
+            value="${esc(id||'')}"
+        >
+    `;
+
+    if (kind === 'income') {
+  fields +=
+    iconSelect(
+      'Tipo',
+      'type',
+      Object.keys(INCOME_ICONS),
+      item?.type || 'Salário'
+    )
+    + input('Descrição', 'description', item?.description || '')
+    + amount('Valor', 'amount', item?.amount ?? '')
+    + date(item?.date || today());
+}
+
+if (kind === 'expense') {
+  fields +=
+    input(
+      'Descrição',
+      'description',
+      item?.description || '',
+      'text',
+      'required'
+    )
+    + iconSelect(
+      'Categoria',
+      'category',
+      CATEGORIES,
+      item?.category || CATEGORIES[0]
+    )
+    + amount('Valor', 'amount', item?.amount ?? '')
+    + date(item?.date || today());
+}
+
+    if (kind === 'debt') {
+  fields +=
+    input('Nome da dívida', 'name', item?.name || '', 'text', 'required')
+    + amount('Valor total', 'total', item?.total ?? '')
+    + input(
+      'N.º de prestações / parcelas (opcional)',
+      'installments',
+      item?.installments ?? '',
+      'number',
+      'min="1" step="1" placeholder="Ex.: 12"'
+    )
+    + amount('Prestação mensal', 'monthly', item?.monthly ?? 0, '0')
+    + `<p class="muted">
+        Podes deixar o número de prestações em branco.
+        Se o preencheres e deixares a prestação mensal a zero,
+        a Aurea calcula uma estimativa: valor total dividido
+        pelo número de prestações.
+      </p>`;
+}
+
+    if(kind==='payment'){
+        const remaining=Math.round(
+            (
+                debtBalance(debt)+
+                Number(item?.amount||0)
+            )*100
+        )/100;
+
+        fields+=`
+            <input
+                type="hidden"
+                name="debtId"
+                value="${esc(debt.id)}"
+            >
+            <input
+                type="hidden"
+                name="paymentId"
+                value="${esc(item?.id||'')}"
+            >
+            <div class="form-info">
+                <strong>${esc(debt.name)}</strong>
+                <span>
+                    Valor máximo: ${money(remaining)}
+                </span>
+            </div>
+        `+
+        amount(
+            'Valor do pagamento',
+            'amount',
+            item?.amount??(
+                Math.min(
+                    debt.monthly,
+                    remaining
+                )||''
+            ),
+            '0.01',
+            `max="${remaining}"`
+        )+
+        date(item?.date||today());
+    }
+
+    if(kind==='fund'){
+        fields+=
+            select(
+                'Movimento',
+                'type',
+                [
+                    ['add','Adicionar ao fundo'],
+                    ['remove','Retirar do fundo']
+                ],
+                item?.type||'add'
+            )+
+            amount(
+                'Valor',
+                'amount',
+                item?.amount??''
+            )+
+            input(
+                'Descrição',
+                'description',
+                item?.description||''
+            )+
+            date(item?.date||today());
+    }
+
+    if(kind==='fundTarget'){
+        fields+=amount(
+            'Meta do fundo de emergência',
+            'target',
+            state.fundTarget,
+            '0'
+        );
+    }
+
+    if(kind==='subscription'){
+        fields+=
+            input(
+                'Nome',
+                'name',
+                item?.name||'',
+                'text',
+                'required'
+            )+
+            amount(
+                'Valor mensal',
+                'amount',
+                item?.amount??0,
+                '0'
+            )+
+            input(
+                'Dia de cobrança',
+                'day',
+                item?.day||1,
+                'number',
+                'min="1" max="31" step="1" required'
+            );
+    }
+
+    if (kind === 'goal') {
+
+    const baseline = Math.max(
+        0,
+        Math.round(
+            (
+                Number(item?.saved || 0) -
+                sum(item?.contributions, c => c.amount)
+            ) * 100
+        ) / 100
+    );
+
+    fields +=
+        input(
+            'Nome do objetivo',
+            'name',
+            item?.name || '',
+            'text',
+            'required'
+        ) +
+
+        amount(
+            'Valor pretendido',
+            'target',
+            item?.target ?? ''
+        ) +
+
+        amount(
+            'Poupança já existente',
+            'saved',
+            baseline,
+            '0'
+        ) +
+
+        input(
+            'Data limite',
+            'date',
+            item?.date || '',
+            'date',
+            'required'
+        ) +
+
+        `
+            <div
+                id="goalPlanPreview"
+                aria-live="polite"
+            ></div>
+
+            <p class="muted">
+                Usa Contribuir para registar novas poupanças.
+                Os valores mensais são uma previsão;
+                só as contribuições registadas são
+                descontadas do saldo.
+            </p>
+        `;
+
+}
+
+    if(kind==='contribution'){
+        fields+=`
+            <input
+                type="hidden"
+                name="goalId"
+                value="${esc(goal.id)}"
+            >
+            <div class="form-info">
+                <strong>${esc(goal.name)}</strong>
+            </div>
+        `+
+        amount(
+            'Valor',
+            'amount',
+            item?.amount??''
+        )+
+        date(item?.date||today());
+    }
+
+    openModal(`
+        <div class="modal-header">
+            <div>
+                <h2>${title}</h2>
+                <p>Preenche os dados abaixo.</p>
+            </div>
+            <button
+                type="button"
+                class="icon-button"
+                data-action="close-modal"
+                aria-label="Fechar"
+            >×</button>
+        </div>
+
+        <form
+            id="dynamicForm"
+            class="dynamic-form"
+        >
+            ${fields}
+
+            <div class="modal-actions">
+                <button
+                    type="button"
+                    class="secondary-button"
+                    data-action="close-modal"
+                >Cancelar</button>
+
+                <button
+                    type="submit"
+                    class="primary-button"
+                >Guardar</button>
+            </div>
+        </form>
+    `);
+    
+    if (kind === 'goal') {
+    updateGoalPreview($('dynamicForm'));
+}
+
+}
+
+function emptyState(title,text){
+    return `
+        <div class="empty-state">
+            <h3>${esc(title)}</h3>
+            <p>${esc(text)}</p>
+        </div>
+    `;
+}
+
+function actionButton(
+    action,
+    text,
+    attrs='',
+    danger=false
+){
+    return `
+        <button
+            type="button"
+            class="small-button${danger?' danger':''}"
+            data-action="${action}"
+            ${attrs}
+        >${text}</button>
+    `;
+}
+
+function row(
+    title,
+    subtitle,
+    amount,
+    positive,
+    icon,
+    actions=''
+){
+    return `
+        <div class="list-row">
+            <div class="item-main">
+                ${icon}
+                <div>
+                    <strong>${esc(title)}</strong>
+                    <span>${esc(subtitle)}</span>
+                </div>
+            </div>
+
+            <div
+                class="item-value ${
+                    positive===true
+                        ?'positive'
+                        :positive===false
+                            ?'negative'
+                            :''
+                }"
+            >
+                ${
+                    positive===true
+                        ?'+'
+                        :positive===false
+                            ?'−'
+                            :''
+                }${money(amount)}
+            </div>
+
+            ${
+                actions
+                    ?`<div class="item-actions">${actions}</div>`
+                    :''
             }
+        </div>
+    `;
+}
 
+function itemActions(kind,id){
+    const attrs=`data-id="${esc(id)}"`;
 
-            if (action === 'open-settings') {
+    return (
+        actionButton(
+            'edit-'+kind,
+            'Editar',
+            attrs
+        )+
+        actionButton(
+            'delete-'+kind,
+            'Apagar',
+            attrs,
+            true
+        )
+    );
+}
 
-                open(
-                    'settingsOverlay'
-                );
+function dateSort(a,b){
+    return String(b.date).localeCompare(
+        String(a.date)
+    );
+}
 
-                return;
-            }
+function renderAureaRecommendations() {
+  const card = $('advisorCard');
+  if (!card) return;
 
+  const p = spendingPlan();
+  const now = today();
+  const thisMonth = ym(now);
 
-            if (action === 'close-settings') {
+  const [year, month] = currentMonth.split('-').map(Number);
+  const daysInMonth = new Date(year, month, 0).getDate();
 
-                close(
-                    'settingsOverlay'
-                );
+  const daysLeft = currentMonth === thisMonth
+    ? daysInMonth - Number(now.slice(8)) + 1
+    : daysInMonth;
 
-                return;
-            }
+  const daily = Math.floor(
+    Math.max(0, Math.round(p.freeAmount * 100)) / daysLeft
+  ) / 100;
 
+  const dailyText = currentMonth < thisMonth
+    ? `O saldo livre no fecho deste mês é ${money(p.freeAmount)}.`
+    : `${money(daily)} por dia. O saldo livre foi distribuído por ${daysLeft} ${daysLeft === 1 ? 'dia' : 'dias'}${currentMonth === thisMonth ? ' até ao fim do mês, incluindo hoje' : ' desse mês'}.`;
 
-            if (action === 'close-dynamic') {
+  const fund = fundBalance();
+  const target = Math.max(0, Number(state.fundTarget) || 0);
+  const missing = Math.max(
+    0,
+    Math.round((target - fund) * 100) / 100
+  );
 
-                close(
-                    'dynamicModal'
-                );
+  const fundText = !target
+    ? 'Define uma meta para o teu fundo de emergência.'
+    : missing > 0
+      ? `Já tens ${money(fund)}. Faltam ${money(missing)} para a meta de ${money(target)}. Reforça o fundo quando houver espaço no teu orçamento.`
+      : `Meta alcançada! Tens ${money(fund)} reservados para imprevistos.`;
 
-                return;
-            }
+  const plans = state.goals.map(goal => ({
+    goal,
+    plan: goalSavingsPlan(goal)
+  }));
 
+  const active = plans.filter(x => x.plan.status === 'active');
 
-            if (action === 'close-chat') {
+  const monthly = Math.round(
+    sum(active, x => x.plan.monthly) * 100
+  ) / 100;
 
-                close(
-                    'chatOverlay'
-                );
+  const overdue = plans.filter(
+    x => x.plan.status === 'overdue'
+  ).length;
 
-                return;
-            }
+  const incomplete = plans.filter(
+    x => ['date', 'target'].includes(x.plan.status)
+  ).length;
 
+  let goalsText = !plans.length
+    ? 'Cria um objetivo com valor, poupança existente e data limite para receberes um plano mensal.'
+    : active.length
+      ? `O plano dos objetivos atuais pede ${money(monthly)} por mês no total. ${active.slice(0, 3).map(x => `${x.goal.name}: ${money(x.plan.monthly)}/mês`).join(' · ')}${active.length > 3 ? ' · e outros objetivos' : ''}.`
+      : 'Os objetivos com valor e prazo definidos já estão concluídos.';
 
-            if (action === 'set-theme') {
+  if (!active.length && (overdue || incomplete)) {
+    goalsText = 'Revê os objetivos que precisam de um novo plano.';
+  }
 
-                state.theme =
-                    button.dataset.themeValue;
+  if (overdue) {
+    goalsText += ` Há ${overdue} ${overdue === 1 ? 'objetivo com o prazo terminado' : 'objetivos com o prazo terminado'}. Atualiza a data limite.`;
+  }
 
-                save();
+  if (incomplete) {
+    goalsText += ' Preenche os valores e as datas em falta.';
+  }
 
-                render();
+  const alertText = p.balance < 0
+    ? `Os movimentos registados excedem o dinheiro disponível em ${money(-p.balance)}. Revê as despesas deste mês.`
+    : p.freeAmount < 0
+      ? `Faltam ${money(-p.freeAmount)} para manter a margem que escolheste proteger. Revê as despesas ou ajusta essa margem.`
+      : p.freeAmount === 0
+        ? 'O saldo livre está a zero. Uma nova despesa reduzirá a margem protegida ou deixará o saldo negativo.'
+        : currentMonth === thisMonth && monthly > p.freeAmount
+          ? `A previsão mensal dos objetivos (${money(monthly)}) ultrapassa o saldo livre atual (${money(p.freeAmount)}). Revê os prazos ou o plano de poupança.`
+          : `Tens ${money(p.freeAmount)} livres depois de proteger ${money(p.protectedAmount)}. Conta também com as despesas que ainda vais registar.`;
 
-                return;
-            }
+  const tips = [
+    [
+      currentMonth < thisMonth ? 'Resumo do mês' : 'Orçamento por dia',
+      dailyText
+    ],
+    ['Fundo de emergência', fundText],
+    ['Objetivos atuais', goalsText],
+    ['Atenção ao orçamento', alertText]
+  ];
 
+  card.innerHTML = `
+    <div class="advisor-head">
+      <div>
+        <span class="eyebrow">Aurea</span>
+        <h3>Recomendações para ti</h3>
+      </div>
+      <span class="advisor-icon">✦</span>
+    </div>
 
-            if (action === 'set-accent') {
+    <div class="advisor-details">
+      <div>
+        <span>Saldo antes da margem</span>
+        <strong>${money(p.balance)}</strong>
+      </div>
+      <div>
+        <span>Margem protegida</span>
+        <strong>${money(p.protectedAmount)}</strong>
+      </div>
+    </div>
 
-                state.accent =
-                    button.dataset.accentValue;
+    <div class="aurea-tips">
+      ${tips.map(([title, text]) => `
+        <div class="aurea-tip">
+          <strong>${esc(title)}</strong>
+          <p>${esc(text)}</p>
+        </div>
+      `).join('')}
+    </div>
 
-                save();
+    <p class="aurea-note">
+      Previsões com base nos movimentos registados.
+      As sugestões de poupança são atualizadas quando registas contribuições.
+      ${currentMonth !== thisMonth
+        ? 'O fundo e os objetivos mostram os valores atuais.'
+        : ''}
+    </p>
+  `;
+}
 
-                render();
+function renderIncomes() {
+  const items = [...monthIncomes()].sort(dateSort);
 
-                return;
-            }
+  $('incomeMonthTotal').textContent = money(totalIncome());
 
+  $('incomesList').innerHTML = items.length
+    ? items.map(x => row(
+        x.description || x.type,
+        `${x.type} · ${formatDate(x.date)}`,
+        x.amount,
+        true,
+        incomeIcon(x.type),
+        itemActions('income', x.id)
+      )).join('')
+    : emptyState(
+        'Sem receitas',
+        'Regista a primeira entrada deste mês.'
+      );
+}
 
-            if (action === 'export-pdf') {
+function renderHome(){
+    const name=state.profile?.name?.trim();
 
-                exportPdf();
+    const greetingEl=$('homeGreeting');
 
-                return;
-            }
+    if(greetingEl){
+        greetingEl.textContent=
+            `${greeting()}${name?', '+name:''}`;
+    }
 
+    const metricIncome=$('metricSalary');
 
-            /* =================================================
-               CHAT
-               ================================================= */
+    if(metricIncome){
+        metricIncome.textContent=
+            money(totalIncome(currentMonth));
+    }
 
-            if (action === 'open-chat') {
+    const metricAvailable=$('metricAvailable');
 
-                openChat();
+    if(metricAvailable){
+        metricAvailable.textContent=
+            money(spendingPlan().freeAmount);
+    }
 
-                return;
-            }
+    const metricDebt=$('metricDebt');
 
+    if(metricDebt){
+        metricDebt.textContent=
+            money(totalDebtBalance());
+    }
 
-            if (action === 'quick-chat') {
+    const metricFund=$('metricFund');
 
-                openChat();
+    if(metricFund){
+        metricFund.textContent=
+            money(fundBalance());
+    }
 
+    const birthday=$('birthdayMessage');
 
-                const question =
-                    button.dataset.question;
+    if(birthday){
+        const msg=birthdayMessage();
 
+        birthday.innerHTML=msg
+            ?`
+                <div class="birthday-card">
+                    <div class="birthday-icon">🎂</div>
+                    <div>
+                        <strong>${esc(msg)}</strong>
+                        <span>
+                            Que este novo ano de vida te traga saúde, felicidade e grandes conquistas, 
+                            tanto nas tuas finanças como na tua vida pessoal. 
+                            Que tenhas coragem para seguir os teus sonhos e muitos motivos para celebrar. ✨
+                        </span>
+                    </div>
+                </div>
+            `
+            :'';
+    }
 
-                addChatMessage(
-                    question,
-                    'user'
-                );
+    const advisor=$('advisorCard');
 
+    if(advisor){
+        const p=spendingPlan();
 
-                setTimeout(
-                    () => {
+        advisor.innerHTML=`
+            <div class="advisor-head">
+                <div>
+                    <span class="eyebrow">Aurea</span>
+                    <h3>Visão deste mês</h3>
+                </div>
+                <span class="advisor-icon">✦</span>
+            </div>
 
-                        addChatMessage(
-                            answerQuestion(
-                                question
-                            )
-                        );
+            <p>
+                ${
+                    p.freeAmount>=0
+                        ?`
+                            Tens
+                            <strong>${money(p.freeAmount)}</strong>
+                            livres depois da margem
+                            que escolheste proteger.
+                        `
+                        :`
+                            Faltam
+                            <strong>${money(-p.freeAmount)}</strong>
+                            para cobrir os movimentos
+                            e a margem deste mês.
+                        `
+                }
+            </p>
 
-                    },
-                    40
-                );
+            <div class="advisor-details">
+                <div>
+                    <span>Saldo antes da margem</span>
+                    <strong>${money(p.balance)}</strong>
+                </div>
+                <div>
+                    <span>Margem protegida</span>
+                    <strong>${money(p.protectedAmount)}</strong>
+                </div>
+            </div>
+        `;
+    }
 
+    const recent=$('recentActivity');
 
-                return;
-            }
+    if(recent){
+        const activities=[];
 
+        state.incomes
+            .filter(x=>ym(x.date)===currentMonth)
+            .forEach(x=>activities.push({
+                date:x.date,
+                title:x.description||x.type,
+                type:'income',
+                amount:x.amount
+            }));
 
-            if (
-                action === 'previous-month' ||
-                action === 'next-month'
-            ) {
+        state.expenses
+            .filter(x=>ym(x.date)===currentMonth)
+            .forEach(x=>activities.push({
+                date:x.date,
+                title:x.description,
+                type:'expense',
+                amount:x.amount
+            }));
 
-                const date =
-                    new Date(
-                        `${currentMonth}-01T12:00:00`
-                    );
+        state.debts.forEach(d=>{
+            (d.payments||[])
+                .filter(x=>ym(x.date)===currentMonth)
+                .forEach(x=>activities.push({
+                    date:x.date,
+                    title:`Pagamento — ${d.name}`,
+                    type:'expense',
+                    amount:x.amount
+                }));
+        });
 
+        activities.sort(dateSort);
 
-                date.setMonth(
-                    date.getMonth() +
+        const top=activities.slice(0,6);
+
+        recent.innerHTML=top.length
+            ?top.map(x=>`
+                <div class="activity-row">
+                    <div>
+                        <strong>${esc(x.title)}</strong>
+                        <span>${formatDate(x.date)}</span>
+                    </div>
+
+                    <strong
+                        class="${
+                            x.type==='income'
+                                ?'positive'
+                                :'negative'
+                        }"
+                    >
+                        ${x.type==='income'?'+':'-'}${money(x.amount)}
+                    </strong>
+                </div>
+            `).join('')
+            :`
+                <div class="empty-state compact">
+                    <p>
+                        Ainda não existem movimentos este mês.
+                    </p>
+                </div>
+            `;
+    }
+}
+
+function renderFund(){
+    const balance=fundBalance();
+    const target=state.fundTarget;
+
+    const percent=target>0
+        ?Math.max(
+            0,
+            Math.min(
+                100,
+                balance/target*100
+            )
+        )
+        :0;
+
+    $('fundCurrent').textContent=money(balance);
+    $('fundTarget').textContent=money(target);
+    $('fundPercent').textContent=`${percent.toFixed(0)}%`;
+    $('fundProgress').style.width=`${percent}%`;
+
+    $('fundList').innerHTML=state.fund.length
+        ?[...state.fund]
+            .sort(dateSort)
+            .map(x=>row(
+                x.description||(
+                    x.type==='add'
+                        ?'Entrada no fundo'
+                        :'Retirada do fundo'
+                ),
+                formatDate(x.date),
+                x.amount,
+                x.type==='add',
+                '<div class="item-icon">◇</div>',
+                itemActions('fund',x.id)
+            ))
+            .join('')
+        :emptyState(
+            'Fundo vazio',
+            'Define uma meta e faz o primeiro reforço.'
+        );
+}
+
+function renderDebts(){
+    $('debtsList').innerHTML=state.debts.length
+        ?state.debts.map(d=>{
+            const paid=debtPaid(d);
+            const balance=debtBalance(d);
+
+            const percent=d.total>0
+                ?Math.min(
+                    100,
+                    paid/d.total*100
+                )
+                :0;
+
+            const payments=[...d.payments]
+                .sort(dateSort)
+                .map(x=>`
+                    <div class="payment-row">
+                        <div>
+                            <strong>${money(x.amount)}</strong>
+                            <span>${formatDate(x.date)}</span>
+                        </div>
+
+                        <div class="item-actions">
+                            ${actionButton(
+                                'edit-payment',
+                                'Editar',
+                                `data-debt-id="${esc(d.id)}" data-payment-id="${esc(x.id)}"`
+                            )}
+
+                            ${actionButton(
+                                'delete-payment',
+                                'Apagar',
+                                `data-debt-id="${esc(d.id)}" data-payment-id="${esc(x.id)}"`,
+                                true
+                            )}
+                        </div>
+                    </div>
+                `).join('');
+
+            return `
+                <article class="debt-card">
+                    <div class="debt-head">
+                        <div>
+                            <h3>${esc(d.name)}</h3>
+                            <span>${d.installments ? `${esc(d.installments)} ${Number(d.installments) === 1 ? 'prestação' : 'prestações'} · ` : ''}Prestação: ${money(d.monthly)}/mês</span>
+                        </div>
+
+                        <div class="item-actions">
+                            ${itemActions('debt',d.id)}
+                        </div>
+                    </div>
+
+                    <div class="debt-values">
+                        <div>
+                            <span>Total</span>
+                            <strong>${money(d.total)}</strong>
+                        </div>
+                        <div>
+                            <span>Pago</span>
+                            <strong>${money(paid)}</strong>
+                        </div>
+                        <div>
+                            <span>Em falta</span>
+                            <strong>${money(balance)}</strong>
+                        </div>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div style="width:${percent}%"></div>
+                    </div>
+
+                    <div class="debt-footer">
+                        <span>${percent.toFixed(0)}% pago</span>
+
+                        <button
+                            type="button"
+                            class="primary-button small"
+                            data-action="add-payment"
+                            data-debt-id="${esc(d.id)}"
+                            ${balance<=0?'disabled':''}
+                        >
+                            Registar pagamento
+                        </button>
+                    </div>
+
+                    <div class="payments-list">
+                        ${
+                            payments||
+                            `
+                                <div class="empty-mini">
+                                    Ainda não existem
+                                    pagamentos registados.
+                                </div>
+                            `
+                        }
+                    </div>
+                </article>
+            `;
+        }).join('')
+        :emptyState(
+            'Ainda não tens dívidas',
+            'Quando tiveres uma, podes registá-la aqui.'
+        );
+}
+
+function renderExpenses(){
+    const items=[...monthExpenses()].sort(dateSort);
+
+    $('expenseMonthTotal').textContent=
+        money(totalExpenses());
+
+    $('expensesList').innerHTML=items.length
+        ?items.map(x=>row(
+            x.description,
+            `${x.category} · ${formatDate(x.date)}`,
+            x.amount,
+            false,
+            categoryIcon(x.category),
+            itemActions('expense',x.id)
+        )).join('')
+        :emptyState(
+            'Sem despesas',
+            'Não tens despesas registadas neste mês.'
+        );
+}
+
+function renderSubscriptions(){
+    $('subscriptionsList').innerHTML=
+        state.subscriptions.length
+            ?state.subscriptions.map(x=>row(
+                x.name,
+                `Dia ${x.day} · mensal`,
+                x.amount,
+                null,
+                '<div class="item-icon">↻</div>',
+                itemActions('subscription',x.id)
+            )).join('')
+            :emptyState(
+                'Sem subscrições',
+                'Regista os teus serviços recorrentes.'
+            );
+}
+
+function renderGoals(){
+    $('goalsList').innerHTML=state.goals.length
+        ?state.goals.map(g=>{
+            const percent=g.target>0
+                ?Math.min(
+                    100,
+                    g.saved/g.target*100
+                )
+                :0;
+
+            const contributions=[...g.contributions]
+                .sort(dateSort)
+                .map(c=>`
+                    <div class="payment-row">
+                        <div>
+                            <strong>${money(c.amount)}</strong>
+                            <span>${formatDate(c.date)}</span>
+                        </div>
+
+                        <div class="item-actions">
+                            ${actionButton(
+                                'edit-contribution',
+                                'Editar',
+                                `data-goal-id="${esc(g.id)}" data-id="${esc(c.id)}"`
+                            )}
+
+                            ${actionButton(
+                                'delete-contribution',
+                                'Apagar',
+                                `data-goal-id="${esc(g.id)}" data-id="${esc(c.id)}"`,
+                                true
+                            )}
+                        </div>
+                    </div>
+                `).join('');
+
+            return `
+                <article class="goal-card">
+                    <div class="goal-head">
+                        <div>
+                            <h3>${esc(g.name)}</h3>
+
+                            ${
+                                g.date
+                                    ?`<span>Até ${formatDate(g.date)}</span>`
+                                    :''
+                            }
+                        </div>
+
+                        <div class="item-actions">
+                            ${itemActions('goal',g.id)}
+                        </div>
+                    </div>
+
+                    <div class="goal-values">
+                        <strong>${money(g.saved)}</strong>
+                        <span>de ${money(g.target)}</span>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div style="width:${percent}%"></div>
+                    </div>
+
+                    <div class="progress-bar">
+    <div style="width:${percent}%"></div>
+</div>
+
+${goalPlanMarkup(g)}
+
+                    <div class="debt-footer">
+                        <span>
+                            ${percent.toFixed(0)}% concluído
+                        </span>
+
+                        <button
+                            type="button"
+                            class="primary-button small"
+                            data-action="add-contribution"
+                            data-goal-id="${esc(g.id)}"
+                        >
+                            Contribuir
+                        </button>
+                    </div>
+
+                    <div class="payments-list">
+                        ${contributions}
+                    </div>
+                </article>
+            `;
+        }).join('')
+        :emptyState(
+            'Sem objetivos',
+            'Cria um objetivo para começares a poupar com propósito.'
+        );
+}
+
+function renderHistory(){
+    const rows=[
+        ...state.incomes.map(x=>({
+            ...x,
+            title:x.description||x.type,
+            category:'Receita',
+            positive:true
+        })),
+
+        ...state.expenses.map(x=>({
+            ...x,
+            title:x.description,
+            positive:false
+        })),
+
+        ...state.debts.flatMap(d=>
+            d.payments.map(x=>({
+                ...x,
+                title:`Pagamento — ${d.name}`,
+                category:'Dívida',
+                positive:false
+            }))
+        ),
+
+        ...state.fund.map(x=>({
+            ...x,
+            title:x.description||'Fundo de emergência',
+            category:x.type==='add'
+                ?'Fundo'
+                :'Retirada do fundo',
+            positive:x.type==='remove'
+        })),
+
+        ...state.goals.flatMap(g=>
+            g.contributions.map(x=>({
+                ...x,
+                title:`Contribuição — ${g.name}`,
+                category:'Objetivo',
+                positive:false
+            }))
+        )
+    ];
+
+    $('historyList').innerHTML = rows.length
+  ? rows.sort(dateSort).map(x => row(
+      x.title,
+      `${x.category} · ${formatDate(x.date)}`,
+      x.amount,
+      x.positive,
+      x.category === 'Receita'
+        ? incomeIcon(x.type)
+        : CATEGORIES.includes(x.category)
+          ? categoryIcon(x.category)
+          : '<div class="item-icon">↔</div>'
+    )).join('')
+  : emptyState(
+      'Histórico vazio',
+      'Os teus movimentos aparecerão aqui.'
+    );
+}
+
+function renderStatistics(){
+    const totalInc=totalIncome(currentMonth);
+    const totalExp=totalExpenses(currentMonth);
+
+    const incomeEl=$('statsIncome');
+
+    for(const [id,value] of Object.entries({
+        statsDebtPayments:monthDebtPayments(),
+        statsFund:monthFundAdds(),
+        statsGoals:monthGoalContributions(),
+        statsMargin:state.safetyMargin,
+        statsFree:spendingPlan().freeAmount
+    })){
+        if($(id)){
+            $(id).textContent=money(value);
+        }
+    }
+
+    const expenseEl=$('statsExpenses');
+    const balanceEl=$('statsBalance');
+
+    if(incomeEl){
+        incomeEl.textContent=money(totalInc);
+    }
+
+    if(expenseEl){
+        expenseEl.textContent=money(totalExp);
+    }
+
+    if(balanceEl){
+        balanceEl.textContent=money(available());
+    }
+
+    const categories={};
+
+    monthExpenses(currentMonth).forEach(x=>{
+        const c=normalizeCategory(x.category);
+
+        categories[c]=
+            (categories[c]||0)+
+            Number(x.amount||0);
+    });
+
+    const list=$('statsCategories');
+
+    if(list){
+        const sorted=Object.entries(categories)
+            .sort((a,b)=>b[1]-a[1]);
+
+        list.innerHTML=sorted.length
+            ?sorted.map(([cat,value])=>`
+                <div class="stat-row">
+                    <div class="item-main">
+                        ${categoryIcon(cat)}
+                        <strong>${esc(cat)}</strong>
+                    </div>
+                    <strong>${money(value)}</strong>
+                </div>
+            `).join('')
+            :`
+                <div class="empty-state compact">
+                    <p>
+                        Ainda não existem despesas neste mês.
+                    </p>
+                </div>
+            `;
+    }
+}
+
+function renderSettings(){
+    $('settingsName').value=state.profile.name;
+
+    $('settingsBirthDate').value=
+        state.profile.birthDate;
+
+    $('settingsSafetyMargin').value=
+        state.safetyMargin;
+
+    $('settingsCurrency').value=
+        state.currency;
+
+    renderThemeChoices();
+}
+
+function render() {
+  currentMonth = ym(today());
+
+  applyTheme();
+  renderHome();
+  renderAureaRecommendations();
+  renderIncomes();
+  renderFund();
+  renderDebts();
+  renderExpenses();
+  renderSubscriptions();
+  renderGoals();
+  renderHistory();
+  renderStatistics();
+  renderSettings();
+  placePageActions();
+}
+
+function refreshCurrentMonth() {
+  if (!document.hidden && currentMonth !== ym(today())) {
+    render();
+  }
+}
+
+document.addEventListener('visibilitychange', refreshCurrentMonth);
+window.addEventListener('focus', refreshCurrentMonth);
+
+function placePageActions() {
+  const topbar = document.querySelector('.topbar');
+  const actions = document.querySelector('.topbar-actions');
+
+  if (!topbar || !actions) return;
+
+  if (window.matchMedia('(max-width: 680px)').matches) {
+    if (actions.parentElement !== topbar) {
+      topbar.append(actions);
+    }
+    return;
+  }
+
+  const section = document.querySelector('.app-section.active');
+  const heading = section?.querySelector(
+    '.home-greeting, .section-heading'
+  );
+
+  if (!heading) return;
+
+  let copy = heading.querySelector(':scope > .page-heading-copy');
+
+  if (!copy) {
+    if (heading.classList.contains('home-greeting')) {
+      copy = document.createElement('div');
+      copy.append(...heading.childNodes);
+      heading.append(copy);
+    } else {
+      copy = heading.firstElementChild;
+    }
+
+    copy.classList.add('page-heading-copy');
+  }
+
+  let group = heading.querySelector(':scope > .page-heading-actions');
+
+  if (!group) {
+    group = document.createElement('div');
+    group.className = 'page-heading-actions';
+
+    [...heading.children]
+      .filter(child => child !== copy)
+      .forEach(child => group.append(child));
+
+    heading.append(group);
+  }
+
+  if (actions.parentElement !== group) {
+    group.append(actions);
+  }
+}
+
+window.addEventListener('resize', placePageActions);
+
+function showSection(section) {
+  currentSection = section;
+
+  document.querySelectorAll('.app-section').forEach(el => {
+    el.classList.toggle(
+      'active',
+      el.dataset.section === section
+    );
+  });
+
+  document.querySelectorAll('[data-section-target]').forEach(el => {
+    el.classList.toggle(
+      'active',
+      el.dataset.sectionTarget === section
+    );
+  });
+
+  placePageActions();
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+}
+
+function setMonth(delta){
+    const d=new Date(
+        `${currentMonth}-01T12:00:00`
+    );
+
+    d.setMonth(d.getMonth()+delta);
+
+    currentMonth=
+        `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+
+    render();
+}
+
+function deleteConfirm(message){
+    return window.confirm(
+        message||'Tens a certeza que queres apagar?'
+    );
+}
+
+function handleDynamicFormSubmit(event){
+    event.preventDefault();
+    event.stopPropagation();
+
+    const form=event.target;
+
+    if(!(form instanceof HTMLFormElement)){
+        return;
+    }
+
+    const data=Object.fromEntries(
+        new FormData(form).entries()
+    );
+
+    const kind=data.kind;
+    const amount=positiveNumber(data.amount);
+    const name=String(data.name||'').trim();
+    const date=data.date||today();
+
+    const nonnegative=v=>Math.max(
+        0,
+        Number(
+            String(v||0).replace(',','.')
+        )||0
+    );
+
+    const lists={
+        income:state.incomes,
+        expense:state.expenses,
+        debt:state.debts,
+        fund:state.fund,
+        subscription:state.subscriptions,
+        goal:state.goals
+    };
+
+    const list=lists[kind];
+
+    const existing=list?.find(
+        x=>x.id===data.id
+    );
+
+    if(list&&data.id&&!existing){
+        showToast('Registo não encontrado.');
+        return;
+    }
+
+    let item;
+    let message='Registo guardado.';
+
+    if(
+        [
+            'income',
+            'expense',
+            'fund',
+            'payment',
+            'contribution'
+        ].includes(kind)&&
+        !amount
+    ){
+        showToast('Indica um valor válido.');
+        return;
+    }
+
+    if(kind==='income'){
+        item={
+            type:String(data.type||'Outro'),
+            description:String(
+                data.description||''
+            ).trim(),
+            amount,
+            date
+        };
+    }
+
+    else if(kind==='expense'){
+        item={
+            description:String(
+                data.description||''
+            ).trim(),
+            category:normalizeCategory(data.category),
+            amount,
+            date
+        };
+    }
+
+    else if (kind === 'debt') {
+  const total = positiveNumber(data.total);
+
+  if (!name || !total) {
+    showToast('Preenche o nome e o valor total.');
+    return;
+  }
+
+  if (existing && total < debtPaid(existing)) {
+    showToast('O total não pode ser inferior aos pagamentos registados.');
+    return;
+  }
+
+  const rawInstallments = String(data.installments || '').trim();
+  const installments = rawInstallments ? Number(rawInstallments) : null;
+
+  if (
+    installments !== null &&
+    (!Number.isSafeInteger(installments) || installments < 1)
+  ) {
+    showToast('Indica um número inteiro de prestações ou deixa o campo em branco.');
+    return;
+  }
+
+  const enteredMonthly = nonnegative(data.monthly);
+  const monthly = enteredMonthly || (
+    installments
+      ? Math.round(total / installments * 100) / 100
+      : 0
+  );
+
+  item = { name, total, monthly, installments };
+
+  if (!existing) item.payments = [];
+}
+
+    else if(kind==='payment'){
+        const debt=state.debts.find(
+            d=>d.id===data.debtId
+        );
+
+        if(!debt){
+            showToast('Dívida não encontrada.');
+            return;
+        }
+
+        const payment=debt.payments.find(
+            p=>p.id===data.paymentId
+        );
+
+        if(data.paymentId&&!payment){
+            showToast('Pagamento não encontrado.');
+            return;
+        }
+
+        const remaining=Math.round(
+            (
+                debtBalance(debt)+
+                Number(payment?.amount||0)
+            )*100
+        )/100;
+
+        if(amount>remaining){
+            showToast(
+                `O pagamento não pode ultrapassar ${money(remaining)}.`
+            );
+            return;
+        }
+
+        if(payment){
+            Object.assign(payment,{
+                amount,
+                date
+            });
+        }else{
+            debt.payments.push({
+                id:uid(),
+                amount,
+                date
+            });
+        }
+
+        message=payment
+            ?'Pagamento atualizado.'
+            :'Pagamento registado.';
+    }
+
+    else if(kind==='fund'){
+        const type=data.type==='remove'
+            ?'remove'
+            :'add';
+
+        const withoutOld=fundBalance()-(
+            existing
+                ?(
+                    existing.type==='add'
+                        ?existing.amount
+                        :-existing.amount
+                )
+                :0
+        );
+
+        if(
+            Math.round(
+                (
+                    withoutOld+
                     (
-                        action === 'next-month'
-                            ? 1
-                            : -1
+                        type==='add'
+                            ?amount
+                            :-amount
                     )
-                );
+                )*100
+            )<0
+        ){
+            showToast(
+                'Este movimento deixaria o fundo com saldo negativo.'
+            );
+            return;
+        }
 
+        item={
+            type,
+            amount,
+            description:String(
+                data.description||''
+            ).trim(),
+            date
+        };
+    }
 
-                currentMonth =
-                    `${date.getFullYear()}-${String(
-                        date.getMonth() + 1
-                    ).padStart(2, '0')}`;
+    else if(kind==='fundTarget'){
+        state.fundTarget=
+            nonnegative(data.target);
 
+        message='Meta do fundo atualizada.';
+    }
 
-                render();
+    else if(kind==='subscription'){
+        if(!name){
+            showToast(
+                'Indica o nome da subscrição.'
+            );
+            return;
+        }
 
-                return;
-            }
-
-
-            if (action === 'delete-all') {
-
-                if (
-                    confirm(
-                        'Apagar TODOS os dados da Aurea? Esta ação não pode ser desfeita.'
+        item={
+            name,
+            amount:nonnegative(data.amount),
+            day:Math.min(
+                31,
+                Math.max(
+                    1,
+                    Math.round(
+                        Number(data.day)||1
                     )
-                ) {
+                )
+            )
+        };
+    }
 
-                    localStorage.removeItem(
-                        KEY
-                    );
+    else if (kind === 'goal') {
 
+    if (
+        !name ||
+        !positiveNumber(data.target)
+    ) {
+        showToast(
+            'Preenche o objetivo e o valor pretendido.'
+        );
+        return;
+    }
 
-                    LEGACY_KEYS.forEach(
-                        key =>
-                            localStorage.removeItem(
-                                key
-                            )
-                    );
+    item = {
+        name,
 
+        target: positiveNumber(data.target),
 
-                    location.reload();
-                }
+        date: data.date || '',
 
+        saved: Math.round(
+            (
+                nonnegative(data.saved) +
+                sum(
+                    existing?.contributions,
+                    c => c.amount
+                )
+            ) * 100
+        ) / 100
+    };
 
-                return;
+    if (!existing) {
+        item.contributions = [];
+    }
+
+}
+
+    else if(kind==='contribution'){
+        const goal=state.goals.find(
+            g=>g.id===data.goalId
+        );
+
+        if(!goal){
+            showToast('Objetivo não encontrado.');
+            return;
+        }
+
+        const c=goal.contributions.find(
+            c=>c.id===data.id
+        );
+
+        if(data.id&&!c){
+            showToast(
+                'Contribuição não encontrada.'
+            );
+            return;
+        }
+
+        goal.saved=Math.round(
+            (
+                goal.saved+
+                amount-
+                Number(c?.amount||0)
+            )*100
+        )/100;
+
+        if(c){
+            Object.assign(c,{
+                amount,
+                date
+            });
+        }else{
+            goal.contributions.push({
+                id:uid(),
+                amount,
+                date
+            });
+        }
+
+        message='Contribuição guardada.';
+    }
+
+    else if(!item){
+        showToast('Formulário desconhecido.');
+        return;
+    }
+
+    if(item){
+        if(existing){
+            Object.assign(existing,item);
+        }else{
+            list.push({
+                id:uid(),
+                ...item
+            });
+        }
+    }
+
+    save();
+    closeModal();
+    render();
+    showToast(message);
+}
+
+function editIncome(id){
+    dynamicForm('income',id);
+}
+
+function editExpense(id){
+    dynamicForm('expense',id);
+}
+
+function editDebt(id){
+    dynamicForm('debt',id);
+}
+
+function editFund(id){
+    dynamicForm('fund',id);
+}
+
+function editSubscription(id){
+    dynamicForm('subscription',id);
+}
+
+function editGoal(id){
+    dynamicForm('goal',id);
+}
+
+function deleteIncome(id){
+    if(!deleteConfirm('Apagar esta receita?')){
+        return;
+    }
+
+    state.incomes=state.incomes.filter(
+        x=>x.id!==id
+    );
+
+    save();
+    render();
+    showToast('Receita apagada.');
+}
+
+function deleteExpense(id){
+    if(!deleteConfirm('Apagar esta despesa?')){
+        return;
+    }
+
+    state.expenses=state.expenses.filter(
+        x=>x.id!==id
+    );
+
+    save();
+    render();
+    showToast('Despesa apagada.');
+}
+
+function deleteDebt(id){
+    if(!deleteConfirm(
+        'Apagar esta dívida e todos os seus pagamentos?'
+    )){
+        return;
+    }
+
+    state.debts=state.debts.filter(
+        x=>x.id!==id
+    );
+
+    save();
+    render();
+    showToast('Dívida apagada.');
+}
+
+function deletePayment(debtId,paymentId){
+    const debt=state.debts.find(
+        d=>d.id===debtId
+    );
+
+    if(!debt)return;
+
+    if(!deleteConfirm('Apagar este pagamento?')){
+        return;
+    }
+
+    debt.payments=(debt.payments||[]).filter(
+        p=>p.id!==paymentId
+    );
+
+    save();
+    render();
+    showToast('Pagamento apagado.');
+}
+
+function deleteFund(id){
+    if(!deleteConfirm(
+        'Apagar este movimento do fundo?'
+    )){
+        return;
+    }
+
+    const movement=state.fund.find(
+        x=>x.id===id
+    );
+
+    if(
+        movement&&
+        fundBalance()-(
+            movement.type==='add'
+                ?movement.amount
+                :-movement.amount
+        )<-0.005
+    ){
+        showToast(
+            'Este movimento é necessário para cobrir as retiradas do fundo.'
+        );
+        return;
+    }
+
+    state.fund=state.fund.filter(
+        x=>x.id!==id
+    );
+
+    save();
+    render();
+    showToast('Movimento apagado.');
+}
+
+function deleteSubscription(id){
+    if(!deleteConfirm(
+        'Apagar esta subscrição?'
+    )){
+        return;
+    }
+
+    state.subscriptions=
+        state.subscriptions.filter(
+            x=>x.id!==id
+        );
+
+    save();
+    render();
+    showToast('Subscrição apagada.');
+}
+
+function deleteGoal(id){
+    if(!deleteConfirm('Apagar este objetivo?')){
+        return;
+    }
+
+    state.goals=state.goals.filter(
+        x=>x.id!==id
+    );
+
+    save();
+    render();
+    showToast('Objetivo apagado.');
+}
+
+function saveSettings(){
+    state.profile.name=String(
+        $('settingsName')?.value||''
+    ).trim();
+
+    state.profile.birthDate=
+        $('settingsBirthDate')?.value||'';
+
+    state.safetyMargin=Math.max(
+        0,
+        Number(
+            String(
+                $('settingsSafetyMargin')?.value||0
+            ).replace(',','.')
+        )
+    );
+
+    const currency=
+        $('settingsCurrency')?.value||'EUR';
+
+    state.currency=[
+        'EUR',
+        'USD',
+        'GBP',
+        'CHF',
+        'BRL'
+    ].includes(currency)
+        ?currency
+        :'EUR';
+
+    save();
+    render();
+    showToast('Definições guardadas.');
+}
+
+function sendChat(question){
+    const q=String(question||'').trim();
+
+    if(!q)return;
+
+    $('chatMessages').insertAdjacentHTML(
+        'beforeend',
+        `
+            <div class="chat-message user">
+                ${esc(q)}
+            </div>
+        `
+    );
+
+    $('chatInput').value='';
+
+    answerQuestion(q);
+}
+
+function answerQuestion(question) {
+  const q = String(question || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/−/g, '-')
+    .trim();
+
+  const p = spendingPlan();
+  const round = value => Math.round(value * 100) / 100;
+  const now = today();
+  const [year, month, day] = now.split('-').map(Number);
+  const days = new Date(year, month, 0).getDate() - day + 1;
+
+  const daily = value => money(
+    Math.floor(Math.max(0, Math.round(value * 100)) / days) / 100
+  );
+
+  const plans = state.goals.map(goal => ({
+    goal,
+    plan: goalSavingsPlan(goal)
+  }));
+
+  const active = plans.filter(x => x.plan.status === 'active');
+  const goalMonthly = round(sum(active, x => x.plan.monthly));
+
+  function parsePrice(raw) {
+    let text = raw.replace(/\s/g, '');
+    const comma = text.lastIndexOf(',');
+    const dot = text.lastIndexOf('.');
+
+    if (comma >= 0 && dot >= 0) {
+      const separator = comma > dot ? ',' : '.';
+      const position = text.lastIndexOf(separator);
+      const decimals = text.slice(position + 1);
+
+      if (!/^\d{1,2}$/.test(decimals)) return NaN;
+
+      text =
+        text.slice(0, position).replace(/[.,]/g, '')
+        + '.' + decimals;
+
+    } else if (comma >= 0) {
+      if (!/^-?\d*,\d{1,2}$/.test(text)) return NaN;
+      text = text.replace(',', '.');
+
+    } else if (dot >= 0) {
+      if (/^-?\d{1,3}(?:\.\d{3})+$/.test(text)) {
+        text = text.replace(/\./g, '');
+      } else if (!/^-?\d*\.\d{1,2}$/.test(text)) {
+        return NaN;
+      }
+    }
+
+    const value = Number(text);
+
+    return Number.isFinite(value)
+      && Number.isSafeInteger(Math.round(value * 100))
+        ? round(value)
+        : NaN;
+  }
+
+  const number = '-?(?:\\d+(?:[.,]\\d+|\\s\\d{3})*|[.,]\\d{1,2})';
+  const unit = '(?:€|£|\\$|(?:euros?|eur|usd|gbp|chf|brl|reais)\\b)';
+
+  const explicit = [...q.matchAll(
+    new RegExp(`(${number})\\s*${unit}|${unit}\\s*(${number})`, 'g')
+  )].map(x => x[1] || x[2]);
+
+  const priced = [...q.matchAll(
+    new RegExp(
+      `(?:gastar|pagar|por|ate|custa(?:m|ria)?|custar|preco(?: de| e)?|valor(?: de| e)?)\\s+(${number})`,
+      'g'
+    )
+  )].map(x => x[1]);
+
+  const bare = new RegExp(
+    `^(?:${unit}\\s*)?(${number})(?:\\s*${unit})?[.!?]?$`
+  ).exec(q);
+
+  let prices = explicit.length
+    ? explicit
+    : priced.length
+      ? priced
+      : bare ? [bare[1]] : [];
+
+  if (!explicit.length && /\d\s*(?:e|ou)\s*-?\d/.test(q)) {
+    prices = [...q.matchAll(new RegExp(number, 'g'))]
+      .map(x => x[0]);
+  }
+
+  const followUp = answerQuestion.pendingPurchase && (
+    bare
+    || /^(?:custa|custaria|seriam|sao|fica por|o preco e)\b/.test(q)
+  );
+
+  const request =
+    /posso|consigo|da para|chega para|tenho dinheiro para|vale a pena|boa ideia|achas|quero|simula/.test(q);
+
+  const spending =
+    followUp
+    || request && (
+      /gastar|comprar|pagar|jantar|almocar|isto|isso|aquilo/.test(q)
+      || prices.length > 0
+        && !/poupar|guardar|objetivo|fundo|margem|divida/.test(q)
+    )
+    || /^(?:gastar|comprar|pagar|jantar)\b/.test(q);
+
+  const perDay =
+    /(?:por dia|diario|diariamente)/.test(q)
+    || Boolean(followUp && answerQuestion.pendingDaily);
+
+  answerQuestion.pendingPurchase = false;
+  answerQuestion.pendingDaily = false;
+
+  let answer;
+
+  if (perDay && (!spending || !prices.length)) {
+    answer = `Tens ${money(p.freeAmount)} livres depois da margem protegida. Distribuindo esse saldo pelos ${days} ${days === 1 ? 'dia que falta' : 'dias que faltam'} até ao fim do mês, a referência é ${daily(p.freeAmount)} por dia.\n\nConta com as despesas que ainda vais registar.`;
+
+  } else if (spending) {
+    const currency = /r\$|\bbrl\b|reais/.test(q) ? 'BRL'
+      : /€|\beuros?\b|\beur\b/.test(q) ? 'EUR'
+      : /£|\bgbp\b/.test(q) ? 'GBP'
+      : /\$|\busd\b/.test(q) ? 'USD'
+      : /\bchf\b/.test(q) ? 'CHF'
+      : null;
+
+    if (currency && currency !== state.currency) {
+      answerQuestion.pendingPurchase = true;
+      answerQuestion.pendingDaily = perDay;
+
+      answer = `A app está configurada em ${state.currency}. Indica o preço nessa moeda para fazer a simulação; não faço conversões cambiais.`;
+
+    } else if (!prices.length) {
+      answerQuestion.pendingPurchase = true;
+      answerQuestion.pendingDaily = perDay;
+
+      answer = `Quanto custaria? Diz-me o valor, por exemplo “${money(50)}”, e comparo com o teu saldo, a margem protegida e os objetivos.`;
+
+    } else if (prices.length > 1) {
+      answerQuestion.pendingPurchase = true;
+      answerQuestion.pendingDaily = perDay;
+
+      answer = `Encontrei mais de um valor. Qual é o ${perDay ? 'valor por dia' : 'custo total'} que queres analisar? Podes responder só com esse valor na moeda escolhida nas definições.`;
+
+    } else {
+      const price = parsePrice(prices[0]);
+      const cost = round(price * (perDay ? days : 1));
+
+      if (
+        !Number.isFinite(cost)
+        || cost <= 0
+        || !Number.isSafeInteger(Math.round(cost * 100))
+      ) {
+        answerQuestion.pendingPurchase = true;
+        answerQuestion.pendingDaily = perDay;
+
+        answer = `Indica um preço positivo, por exemplo “${money(50)}” ou “${money(49.9)}”.`;
+
+      } else {
+        const after = round(p.freeAmount - cost);
+        const cashAfter = round(p.balance - cost);
+
+        if (cashAfter < 0) {
+          answer = `Essa despesa de ${money(cost)} deixaria o saldo antes da margem negativo em ${money(-cashAfter)}. Pelos movimentos registados, o dinheiro disponível não chega para esse valor.`;
+
+        } else if (after < 0) {
+          answer = `Consegues pagar ${money(cost)} com o saldo antes da margem, mas ficariam apenas ${money(cashAfter)}. Para manter a margem de ${money(p.protectedAmount)}, faltariam ${money(-after)}. Eu ponderaria adiar um gasto que não seja urgente.`;
+
+        } else {
+          answer = `Pelos valores registados, ${money(cost)} cabem no saldo livre e mantêm a margem de ${money(p.protectedAmount)}. Depois desse gasto ficariam ${money(after)} livres, cerca de ${daily(after)} por dia até ao fim do mês.`;
+
+          if (!after) {
+            answer += '\n\nFicarias sem saldo livre para novas despesas.';
+          } else if (cost >= p.freeAmount * 0.25) {
+            answer += `\n\nEste gasto consumiria ${Math.round(cost / p.freeAmount * 100)}% do saldo livre atual. Se não for urgente, pondera o impacto nas despesas que ainda faltam.`;
+          }
+        }
+
+        if (perDay) {
+          answer = `${money(price)} por dia durante ${days} dias somariam ${money(cost)}.\n\n` + answer;
+        }
+
+        if (active.length) {
+          answer += `\n\nO plano dos teus objetivos aponta para ${money(goalMonthly)}/mês no total.`;
+
+          if (after >= 0 && after < goalMonthly) {
+            answer += ` O saldo livre após esse gasto ficaria ${money(round(goalMonthly - after))} abaixo dessa previsão. Revê o plano ou os prazos se quiseres manter essa poupança.`;
+          }
+        }
+
+        answer += '\n\nEsta é uma simulação com os registos atuais. Confirma também os encargos que ainda não registaste.';
+      }
+    }
+
+  } else {
+    const previous = /mes passado|mes anterior/.test(q);
+    const reference = new Date(year, month - (previous ? 2 : 1), 1);
+
+    const period =
+      `${reference.getFullYear()}-${String(reference.getMonth() + 1).padStart(2, '0')}`;
+
+    const label = previous ? monthLabel(period) : 'este mês';
+
+    const category = CATEGORIES.find(name =>
+      q.includes(
+        name.toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+      )
+    ) || (/combustivel/.test(q) ? 'Carro' : null);
+
+    if (/receita|salario|ganhei|ganho/.test(q)) {
+      answer = `Em ${label}, registaste ${money(totalIncome(period))} em receitas, em ${monthIncomes(period).length} entradas.`;
+
+    } else if (/fundo|emergencia/.test(q)) {
+      const balance = fundBalance();
+      const target = Math.max(0, Number(state.fundTarget) || 0);
+
+      answer = `O fundo tem ${money(balance)}. ${target ? `Faltam ${money(Math.max(0, round(target - balance)))} para a meta de ${money(target)}.` : 'Define uma meta para acompanhar o progresso.'}\n\nEste mês adicionaste ${money(monthFundAdds())} e levantaste ${money(monthFundWithdrawals())}. Os levantamentos devolvem dinheiro ao saldo disponível.`;
+
+    } else if (/objetiv|poupar|poupanca|guardar|recomend|sugest/.test(q)) {
+      answer = active.length
+        ? `Os objetivos atuais pedem ${money(goalMonthly)}/mês no total:\n${active.slice(0, 5).map(x => `• ${x.goal.name}: ${money(x.plan.monthly)}/mês`).join('\n')}${active.length > 5 ? '\nConsulta os restantes na página Objetivos.' : ''}`
+        : 'Não há objetivos com um plano mensal ativo. Cria um objetivo ou revê os valores e a data limite dos existentes.';
+
+      if (plans.some(x => x.plan.status === 'overdue')) {
+        answer += '\n\nHá objetivos com o prazo terminado. Atualiza as datas para refazer o plano.';
+      }
+
+      if (active.length && goalMonthly > Math.max(0, p.freeAmount)) {
+        answer += '\n\nEssa previsão ultrapassa o saldo livre atual. Podes rever os prazos e os valores para tornar o plano mais confortável.';
+      }
+
+      answer += `\n\nA referência para despesas este mês é ${daily(p.freeAmount)} por dia, depois da margem protegida.`;
+
+    } else if (/divida|emprestimo|prestac|parcela/.test(q)) {
+      const open = state.debts.filter(debt => debtBalance(debt) > 0);
+
+      answer = `Tens ${money(totalDebtBalance())} em dívidas por pagar. As prestações mensais indicadas nas dívidas em aberto somam ${money(sum(open, x => x.monthly))}.\n\nEm ${label}, registaste ${money(monthDebtPayments(period))} em pagamentos.`;
+
+    } else if (/margem|proteg/.test(q)) {
+      answer = `Escolheste proteger ${money(p.protectedAmount)}. O saldo antes dessa margem é ${money(p.balance)} e o saldo livre é ${money(p.freeAmount)}.\n\n${p.freeAmount < 0 ? 'O saldo atual não chega para manter toda a margem escolhida.' : 'Uma compra acima do saldo livre começaria a utilizar essa margem.'}`;
+
+    } else if (category || /despesa|gastei|gasto|gastar|categoria/.test(q)) {
+      const totals = {};
+
+      monthExpenses(period).forEach(x => {
+        totals[x.category] =
+          (totals[x.category] || 0) + Number(x.amount || 0);
+      });
+
+      const sorted = Object.entries(totals)
+        .sort((a, b) => b[1] - a[1]);
+
+      answer = category
+        ? `Em ${label}, registaste ${money(totals[category] || 0)} em ${category}.`
+        : `Em ${label}, registaste ${money(totalExpenses(period))} em despesas. ${sorted.length ? `A categoria com mais gastos é ${sorted[0][0]}: ${money(sorted[0][1])}.` : 'Ainda não há despesas nesse mês.'}`;
+
+    } else if (/saldo|disponivel|livre/.test(q)) {
+      answer = `O saldo antes da margem é ${money(p.balance)}. Depois de proteger ${money(p.protectedAmount)}, tens ${money(p.freeAmount)} livres.\n\nA referência até ao fim do mês é ${daily(p.freeAmount)} por dia, com base nos movimentos já registados.`;
+
+    } else if (/^(?:ola|oi|bom dia|boa tarde|boa noite|obrigad)/.test(q)) {
+      answer = 'Olá! Posso ajudar-te a analisar uma compra, consultar despesas e acompanhar as poupanças. Experimenta: “Posso gastar 50 €?”';
+
+    } else {
+      answer = 'Experimenta uma destas perguntas:\n• Posso gastar 50 €?\n• Quanto posso gastar por dia?\n• Quanto gastei em alimentação?\n• Quanto gastei no mês passado?\n• Como estão os meus objetivos?\n• Como está o fundo?';
+    }
+  }
+
+  const messages = $('chatMessages');
+
+  if (messages) {
+    messages.insertAdjacentHTML(
+      'beforeend',
+      `<div class="chat-message assistant">${esc(answer)}</div>`
+    );
+
+    const reply = messages.lastElementChild;
+
+    messages.scrollTop +=
+      reply.getBoundingClientRect().top
+      - messages.getBoundingClientRect().top
+      - 18;
+  }
+}
+
+function printReport(){
+    const report=$('printReport');
+
+    report.innerHTML=`
+        <h1>Aurea Finanças</h1>
+
+        <p>
+            ${esc(state.profile.name)}
+            · ${monthLabel(currentMonth)}
+        </p>
+
+        <h2>Resumo mensal</h2>
+
+        <p>Receitas: ${money(totalIncome())}</p>
+        <p>Despesas: ${money(totalExpenses())}</p>
+
+        <p>
+            Pagamentos de dívidas:
+            ${money(monthDebtPayments())}
+        </p>
+
+        <p>
+            Reforços do fundo:
+            ${money(monthFundAdds())}
+        </p>
+
+        <p>
+            Contribuições para objetivos:
+            ${money(monthGoalContributions())}
+        </p>
+
+        <p>
+            Margem protegida:
+            ${money(state.safetyMargin)}
+        </p>
+
+        <p>
+            <strong>
+                Saldo livre:
+                ${money(spendingPlan().freeAmount)}
+            </strong>
+        </p>
+
+        <h2>Movimentos</h2>
+        ${$('historyList').innerHTML}
+
+        <p>Desenvolvido por Carlos Sá</p>
+    `;
+
+    document.body.classList.add(
+        'printing-report'
+    );
+
+    window.print();
+
+    document.body.classList.remove(
+        'printing-report'
+    );
+}
+
+function exportData(){
+    const blob=new Blob(
+        [JSON.stringify(state,null,2)],
+        {type:'application/json'}
+    );
+
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+
+    a.href=url;
+    a.download=`aurea-financas-${today()}.json`;
+
+    document.body.appendChild(a);
+
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+}
+
+function importData(file){
+    if(!file)return;
+
+    const reader=new FileReader();
+
+    reader.onload=()=>{
+        try{
+            const imported=JSON.parse(
+                reader.result
+            );
+
+            if(
+                !imported||
+                typeof imported!=='object'
+            ){
+                throw new Error();
             }
 
+            const arrays=[
+                'incomes',
+                'expenses',
+                'debts',
+                'fund',
+                'goals',
+                'subscriptions'
+            ];
 
-            if (
-                action === 'add-expense' ||
-                action === 'edit-expense'
-            ) {
-
-                const item =
-                    state.expenses.find(
-                        expense =>
-                            expense.id === id
-                    ) || {};
-
-
-                showModal(
-                    action === 'edit-expense'
-                        ? 'Editar despesa'
-                        : 'Nova despesa',
-
-                    dynamicForm(
-                        'expense',
-                        item
-                    )
-                );
-
-
-                return;
+            if(
+                !arrays.some(
+                    k=>Array.isArray(imported[k])
+                )||
+                arrays.some(
+                    k=>
+                        k in imported&&
+                        !Array.isArray(imported[k])
+                )
+            ){
+                throw new Error();
             }
 
-
-            if (
-                action === 'delete-expense'
-            ) {
-
-                if (
-                    confirm(
-                        'Eliminar esta despesa?'
-                    )
-                ) {
-
-                    state.expenses =
-                        state.expenses.filter(
-                            expense =>
-                                expense.id !== id
-                        );
-
-
-                    save();
-
-                    render();
-
-                    showToast(
-                        'Despesa eliminada.'
-                    );
-                }
-
-
-                return;
-            }
-
-
-            if (
-                action === 'add-debt' ||
-                action === 'edit-debt'
-            ) {
-
-                const item =
-                    state.debts.find(
-                        debt =>
-                            debt.id === id
-                    ) || {};
-
-
-                showModal(
-                    action === 'edit-debt'
-                        ? 'Editar dívida'
-                        : 'Nova dívida',
-
-                    dynamicForm(
-                        'debt',
-                        item
-                    )
-                );
-
-
-                return;
-            }
-
-
-            if (
-                action === 'delete-debt'
-            ) {
-
-                if (
-                    confirm(
-                        'Eliminar esta dívida e os pagamentos associados?'
-                    )
-                ) {
-
-                    state.debts =
-                        state.debts.filter(
-                            debt =>
-                                debt.id !== id
-                        );
-
-
-                    save();
-
-                    render();
-
-                    showToast(
-                        'Dívida eliminada.'
-                    );
-                }
-
-
-                return;
-            }
-
-
-            if (
-                action === 'pay-debt'
-            ) {
-
-                const debt =
-                    state.debts.find(
-                        item =>
-                            item.id === id
-                    );
-
-
-                if (debt) {
-
-                    showModal(
-                        'Registar pagamento',
-                        dynamicForm(
-                            'payment',
-                            debt
-                        )
-                    );
-                }
-
-
-                return;
-            }
-
-
-            if (
-                action === 'add-fund' ||
-                action === 'edit-fund'
-            ) {
-
-                const item =
-                    state.fund.find(
-                        movement =>
-                            movement.id === id
-                    ) || {};
-
-
-                showModal(
-                    action === 'edit-fund'
-                        ? 'Editar movimento'
-                        : 'Novo movimento',
-
-                    dynamicForm(
-                        'fund',
-                        item
-                    )
-                );
-
-
-                return;
-            }
-
-
-            if (
-                action === 'delete-fund'
-            ) {
-
-                if (
-                    confirm(
-                        'Eliminar este movimento do fundo?'
-                    )
-                ) {
-
-                    state.fund =
-                        state.fund.filter(
-                            movement =>
-                                movement.id !== id
-                        );
-
-
-                    save();
-
-                    render();
-
-                    showToast(
-                        'Movimento eliminado.'
-                    );
-                }
-
-
-                return;
-            }
-
-
-            if (
-                action === 'add-goal' ||
-                action === 'edit-goal'
-            ) {
-
-                const item =
-                    state.goals.find(
-                        goal =>
-                            goal.id === id
-                    ) || {};
-
-
-                showModal(
-                    action === 'edit-goal'
-                        ? 'Editar objetivo'
-                        : 'Novo objetivo',
-
-                    dynamicForm(
-                        'goal',
-                        item
-                    )
-                );
-
-
-                return;
-            }
-
-
-            if (
-                action === 'goal-add'
-            ) {
-
-                showModal(
-                    'Adicionar dinheiro',
-
-                    dynamicForm(
-                        'goaladd',
-                        { id }
-                    )
-                );
-
-
-                return;
-            }
-
-
-            if (
-                action === 'delete-goal'
-            ) {
-
-                if (
-                    confirm(
-                        'Eliminar este objetivo?'
-                    )
-                ) {
-
-                    state.goals =
-                        state.goals.filter(
-                            goal =>
-                                goal.id !== id
-                        );
-
-
-                    save();
-
-                    render();
-
-                    showToast(
-                        'Objetivo eliminado.'
-                    );
-                }
-
-
-                return;
-            }
-
-
-            if (
-                action === 'add-subscription' ||
-                action === 'edit-subscription'
-            ) {
-
-                const item =
-                    state.subscriptions.find(
-                        subscription =>
-                            subscription.id === id
-                    ) || {};
-
-
-                showModal(
-                    action === 'edit-subscription'
-                        ? 'Editar subscrição'
-                        : 'Nova subscrição',
-
-                    dynamicForm(
-                        'subscription',
-                        item
-                    )
-                );
-
-
-                return;
-            }
-
-
-            if (
-                action === 'delete-subscription'
-            ) {
-
-                if (
-                    confirm(
-                        'Eliminar esta subscrição?'
-                    )
-                ) {
-
-                    state.subscriptions =
-                        state.subscriptions.filter(
-                            subscription =>
-                                subscription.id !== id
-                        );
-
-
-                    save();
-
-                    render();
-
-                    showToast(
-                        'Subscrição eliminada.'
-                    );
-                }
-
-
-                return;
-            }
-
+            state=normalizeState(imported);
+            save();
+            render();
+            showWelcome();
+            showToast('Dados importados.');
+        }catch{
+            showToast(
+                'Não foi possível importar os dados.'
+            );
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+function deleteAllData() {
+    if (!deleteConfirm(
+        'Isto vai apagar todos os dados da Aurea. Continuar?'
+    )) return;
+
+    state = cloneDefaults();
+
+    LEGACY_KEYS.forEach(key => localStorage.removeItem(key));
+
+    save();
+    closeModal();
+    closeChat();
+    closeSettings();
+
+    answerQuestion.pendingPurchase = false;
+    answerQuestion.pendingDaily = false;
+
+    const messages = $('chatMessages');
+
+    if (messages?.firstElementChild) {
+        messages.replaceChildren(
+            messages.firstElementChild.cloneNode(true)
+        );
+    }
+
+    $('chatInput').value = '';
+
+    showSection('home');
+    render();
+    showWelcome();
+
+    showToast(
+        'Todos os dados foram apagados. Cria o teu perfil para começar.'
+    );
+}
+
+function setupEvents(){
+        document.addEventListener(
+        'input',
+        event => {
+            updateGoalPreview(
+                event.target.closest('form')
+            );
         }
     );
-/* =========================================================
-   FECHAR MENU "MAIS" AO CLICAR FORA
-   ========================================================= */
+    document.addEventListener(
+        'click',
+        event=>{
+            const button=event.target.closest(
+                '[data-action]'
+            );
 
-document.addEventListener(
-    'click',
+            if(!button)return;
+
+            const {
+                action,
+                id,
+                debtId,
+                paymentId,
+                goalId
+            }=button.dataset;
+
+            const kinds=[
+                'income',
+                'expense',
+                'debt',
+                'fund',
+                'subscription',
+                'goal'
+            ];
+
+            for(const kind of kinds){
+                if(action==='add-'+kind){
+                    dynamicForm(kind);
+                    return;
+                }
+
+                if(action==='edit-'+kind){
+                    dynamicForm(kind,id);
+                    return;
+                }
+            }
+
+            const deletes={
+                'delete-income':deleteIncome,
+                'delete-expense':deleteExpense,
+                'delete-debt':deleteDebt,
+                'delete-fund':deleteFund,
+                'delete-subscription':deleteSubscription,
+                'delete-goal':deleteGoal
+            };
+
+            if(deletes[action]){
+                deletes[action](id);
+                return;
+            }
+
+            if(action==='navigate'){
+                showSection(
+                    button.dataset.section||'home'
+                );
+                return;
+            }
+
+            if(
+                action==='prev-month'||
+                action==='next-month'
+            ){
+                setMonth(
+                    action==='prev-month'
+                        ?-1
+                        :1
+                );
+                return;
+            }
+
+            if(action==='today-month'){
+                currentMonth=ym(today());
+                render();
+                return;
+            }
+
+            if(
+                action==='add-payment'||
+                action==='edit-payment'
+            ){
+                dynamicForm(
+                    'payment',
+                    action==='edit-payment'
+                        ?paymentId
+                        :null,
+                    {debtId}
+                );
+                return;
+            }
+
+            if(action==='delete-payment'){
+                deletePayment(
+                    debtId,
+                    paymentId
+                );
+                return;
+            }
+
+            if(
+                action==='add-contribution'||
+                action==='edit-contribution'
+            ){
+                dynamicForm(
+                    'contribution',
+                    id||null,
+                    {goalId}
+                );
+                return;
+            }
+
+            if(action==='delete-contribution'){
+                const g=state.goals.find(
+                    g=>g.id===goalId
+                );
+
+                const c=g?.contributions.find(
+                    c=>c.id===id
+                );
+
+                if(
+                    c&&
+                    deleteConfirm(
+                        'Apagar esta contribuição?'
+                    )
+                ){
+                    g.saved=Math.round(
+                        (g.saved-c.amount)*100
+                    )/100;
+
+                    g.contributions=
+                        g.contributions.filter(
+                            x=>x.id!==id
+                        );
+
+                    save();
+                    render();
+                }
+
+                return;
+            }
+
+            if(action==='edit-fund-target'){
+                dynamicForm('fundTarget');
+                return;
+            }
+
+            if(action==='open-chat'){
+                openChat();
+                return;
+            }
+
+            if(action==='close-chat'){
+                closeChat();
+                return;
+            }
+
+            if(action==='quick-chat'){
+                sendChat(
+                    button.dataset.question||
+                    button.textContent
+                );
+                return;
+            }
+
+            if(action==='close-modal'){
+                closeModal();
+                return;
+            }
+
+            if(action==='open-settings'){
+                renderSettings();
+
+                $('settingsModal').classList.add(
+                    'open'
+                );
+
+                $('settingsModal').setAttribute(
+                    'aria-hidden',
+                    'false'
+                );
+
+                return;
+            }
+
+            if(action==='close-settings'){
+                closeSettings();
+                return;
+            }
+
+            if(
+                action==='theme'||
+                action==='accent'
+            ){
+                state[
+                    action==='theme'
+                        ?'theme'
+                        :'accent'
+                ]=
+                    action==='theme'
+                        ?button.dataset.theme
+                        :button.dataset.accentValue;
+
+                save();
+                applyTheme();
+                renderThemeChoices();
+
+                return;
+            }
+
+            if(action==='print-report'){
+                printReport();
+            }
+
+            if(action==='export-data'){
+                exportData();
+            }
+
+            if(action==='delete-all'){
+                deleteAllData();
+            }
+        }
+    );
+
+    document.addEventListener(
+    'submit',
     event => {
 
-        const moreMenu =
-            $('mobileMoreMenu');
+        const form = event.target;
 
-
-        const moreButton =
-            document.querySelector(
-                '.mobile-more-button'
-            );
-
-
-        if (
-            !moreMenu ||
-            !moreButton
-        ) {
+        if (!(form instanceof HTMLFormElement)) {
             return;
         }
 
+        const formId = form.getAttribute('id');
 
-        if (
-            !moreMenu.classList.contains(
-                'open'
-            )
-        ) {
+        if (formId === 'dynamicForm') {
+            handleDynamicFormSubmit(event);
             return;
         }
 
-
-        const clickedInsideMenu =
-            event.target.closest(
-                '#mobileMoreMenu'
-            );
-
-
-        const clickedMoreButton =
-            event.target.closest(
-                '.mobile-more-button'
-            );
-
-
-        if (
-            clickedInsideMenu ||
-            clickedMoreButton
-        ) {
+        if (formId === 'financeForm') {
+            event.preventDefault();
+            saveSettings();
             return;
         }
 
-
-        moreMenu.classList.remove(
-            'open'
-        );
-
-
-        moreButton.setAttribute(
-            'aria-expanded',
-            'false'
-        );
+        if (formId === 'chatForm') {
+            event.preventDefault();
+            sendChat($('chatInput').value);
+        }
 
     }
 );
 
-    /* =========================================================
-       FORMULÁRIOS FIXOS
-       ========================================================= */
+    document.addEventListener('change', event => {
+  if (event.target.matches('[data-icon-option]')) {
+    updateIconSelect(event.target);
+  }
+
+  if (event.target.id === 'importFile') {
+    importData(event.target.files?.[0]);
+    event.target.value = '';
+  }
+});
 
     document.addEventListener(
-        'submit',
-        event => {
-
-            const form =
-                event.target;
-
-
-            if (!form) {
-                return;
+        'keydown',
+        event=>{
+            if(event.key==='Escape'){
+                closeModal();
+                closeChat();
+                closeSettings();
             }
-
-
-            if (
-                form.id ===
-                'welcomeForm'
-            ) {
-
-                event.preventDefault();
-
-
-                const name =
-                    $('welcomeName')
-                        ?.value
-                        .trim() || '';
-
-
-                if (!name) {
-
-                    showToast(
-                        'Indica o teu nome.'
-                    );
-
-                    return;
-                }
-
-
-                state.profile.name =
-                    name;
-
-
-                save();
-
-                close(
-                    'welcomeOverlay'
-                );
-
-                render();
-
-                return;
-            }
-
-
-            if (
-                form.id ===
-                'profileForm'
-            ) {
-
-                event.preventDefault();
-
-
-                state.profile.name =
-                    $('settingsName')
-                        ?.value
-                        .trim() || '';
-
-
-                state.profile.birthDate =
-                    $('settingsBirthDate')
-                        ?.value || '';
-
-
-                save();
-
-                render();
-
-                showToast(
-                    'Perfil guardado.'
-                );
-
-                return;
-            }
-
-
-            if (
-                form.id ===
-                'financeForm'
-            ) {
-
-                event.preventDefault();
-
-
-                state.salary =
-                    Math.max(
-                        0,
-                        Number(
-                            String(
-                                $('settingsSalary')
-                                    ?.value || 0
-                            ).replace(',', '.')
-                        )
-                    );
-
-
-                state.fundTarget =
-                    Math.max(
-                        1,
-                        Number(
-                            String(
-                                $('settingsFundTarget')
-                                    ?.value || 1000
-                            ).replace(',', '.')
-                        )
-                    );
-
-
-                save();
-
-                render();
-
-                showToast(
-                    'Dados financeiros guardados.'
-                );
-
-                return;
-            }
-
-
-            if (
-                form.id === 'addFundForm' ||
-                form.id === 'removeFundForm'
-            ) {
-
-                event.preventDefault();
-
-
-                const adding =
-                    form.id ===
-                    'addFundForm';
-
-
-                const amount =
-                    positiveNumber(
-                        $(
-                            adding
-                                ? 'fundAddAmount'
-                                : 'fundRemoveAmount'
-                        )?.value
-                    );
-
-
-                const date =
-                    $(
-                        adding
-                            ? 'fundAddDate'
-                            : 'fundRemoveDate'
-                    )?.value ||
-                    today();
-
-
-                if (!amount) {
-
-                    showToast(
-                        'Indica um valor válido.'
-                    );
-
-                    return;
-                }
-
-
-                if (
-                    !adding &&
-                    amount > fundBalance()
-                ) {
-
-                    showToast(
-                        'Não podes levantar mais do que tens no fundo.'
-                    );
-
-                    return;
-                }
-
-
-                state.fund.push({
-
-                    id: uid(),
-
-                    type:
-                        adding
-                            ? 'add'
-                            : 'remove',
-
-                    amount,
-
-                    date
-
-                });
-
-
-                save();
-
-                render();
-
-                form.reset();
-
-
-                const dateInput =
-                    $(
-                        adding
-                            ? 'fundAddDate'
-                            : 'fundRemoveDate'
-                    );
-
-
-                if (dateInput) {
-                    dateInput.value =
-                        today();
-                }
-
-
-                showToast(
-                    adding
-                        ? 'Dinheiro adicionado ao fundo.'
-                        : 'Dinheiro retirado do fundo.'
-                );
-
-
-                return;
-            }
-
-
-            if (
-                form.id ===
-                'chatForm'
-            ) {
-
-                event.preventDefault();
-
-
-                const input =
-                    $('chatInput');
-
-
-                const question =
-                    input
-                        ?.value
-                        .trim();
-
-
-                if (!question) {
-                    return;
-                }
-
-
-                addChatMessage(
-                    question,
-                    'user'
-                );
-
-
-                input.value =
-                    '';
-
-
-                setTimeout(
-                    () => {
-
-                        addChatMessage(
-                            answerQuestion(
-                                question
-                            )
-                        );
-
-                    },
-                    40
-                );
-
-
-                return;
-            }
-
         }
     );
+}
 
+function closeSettings(){
+    $('settingsModal').classList.remove('open');
 
-    /* =========================================================
-       SELEÇÃO DE CATEGORIA
-       ========================================================= */
-
-    document.addEventListener(
-        'change',
-        event => {
-
-            if (
-                event.target.matches(
-                    '#expenseCategoryValue'
-                )
-            ) {
-                return;
-            }
-
-        }
+    $('settingsModal').setAttribute(
+        'aria-hidden',
+        'true'
     );
+}
 
-
-    /* =========================================================
-       FECHAR OVERLAYS AO CLICAR FORA
-       ========================================================= */
-
-    document
-        .querySelectorAll('.overlay')
-        .forEach(overlay => {
-
-            overlay.addEventListener(
-                'click',
-                event => {
-
-                    if (
-                        event.target ===
-                        overlay
-                    ) {
-
-                        overlay.classList.add(
-                            'hidden'
-                        );
-                    }
-                }
-            );
-        });
-
-
-    /* =========================================================
-   SERVICE WORKER
-   ========================================================= */
-
-if ('serviceWorker' in navigator) {
-
-    window.addEventListener('load', async () => {
-
-        try {
-
-            const registration =
-                await navigator.serviceWorker.register(
-                    './service-worker.js',
-                    {
-                        scope: './',
-                        updateViaCache: 'none'
-                    }
-                );
-
-            console.log(
-                'Aurea Service Worker registado:',
-                registration.scope
-            );
-
-            await registration.update();
-
-        } catch (error) {
-
-            console.error(
-                'Aurea Service Worker ERRO:',
-                error
-            );
-        }
-
+function renderThemeChoices(){
+    document.querySelectorAll(
+        '[data-accent-value]'
+    ).forEach(b=>{
+        b.classList.toggle(
+            'active',
+            b.dataset.accentValue===state.accent
+        );
     });
 
-}
+    $('themeLight').classList.toggle(
+        'active',
+        state.theme==='light'
+    );
 
-
-    /* =========================================================
-       DATAS DO FUNDO
-       ========================================================= */
-
-    if ($('fundAddDate')) {
-
-        $('fundAddDate').value =
-            today();
-    }
-
-
-    if ($('fundRemoveDate')) {
-
-        $('fundRemoveDate').value =
-            today();
-    }
-
-
-    /* =========================================================
-       ARRANQUE
-       ========================================================= */
-
-    render();
-
-function hasExistingUserData() {
-    const profile = state.profile || {};
-
-    return Boolean(
-        profile.name?.trim() ||
-        profile.birthDate ||
-        Number(state.salary) > 0 ||
-        (state.expenses && state.expenses.length > 0) ||
-        (state.debts && state.debts.length > 0) ||
-        (state.fund && state.fund.length > 0) ||
-        (state.goals && state.goals.length > 0) ||
-        (state.subscriptions && state.subscriptions.length > 0)
+    $('themeDark').classList.toggle(
+        'active',
+        state.theme==='dark'
     );
 }
 
-if (!hasExistingUserData()) {
-    open('welcomeOverlay');
-} else {
-    document.getElementById('welcomeOverlay')?.classList.add('hidden');
+function showWelcome() {
+    const welcome = $('welcomeOverlay');
+    if (!welcome) return;
+
+    const pending = !String(state.profile?.name || '').trim();
+
+    document.body.classList.toggle('profile-pending', pending);
+    welcome.classList.toggle('open', pending);
+    welcome.setAttribute('aria-hidden', String(!pending));
+
+    document.querySelectorAll(
+        '.app-shell, .mobile-nav, .chat-fab, ' +
+        '#settingsModal, #dynamicModal, #chatModal'
+    ).forEach(el => {
+        el.inert = pending;
+    });
+
+    if (!pending) return;
+
+    $('welcomeForm').reset();
+    $('welcomeName').setCustomValidity('');
+    $('welcomeBirthDate').max = today();
+    $('welcomeName').focus();
+}
+
+function setupWelcome() {
+    const welcome = $('welcomeOverlay');
+    const form = $('welcomeForm');
+    if (!welcome || !form) return;
+
+    const nameInput = $('welcomeName');
+
+    nameInput.addEventListener('input', () => {
+        nameInput.setCustomValidity('');
+    });
+
+    form.addEventListener('submit', event => {
+        event.preventDefault();
+
+        const name = nameInput.value.trim();
+
+        nameInput.setCustomValidity(
+            name ? '' : 'Indica o teu nome para começar.'
+        );
+
+        $('welcomeBirthDate').max = today();
+
+        if (!form.reportValidity()) return;
+
+        state.profile = {
+            ...state.profile,
+            name,
+            birthDate: $('welcomeBirthDate').value
+        };
+
+        save();
+        render();
+        showWelcome();
+
+        $('homeGreeting').setAttribute('tabindex', '-1');
+        $('homeGreeting').focus();
+
+        showToast(`Bem-vindo à Aurea, ${name}.`);
+    });
+
+    welcome.addEventListener('keydown', event => {
+        if (event.key !== 'Tab') return;
+
+        const first = nameInput;
+        const last = form.querySelector('button[type="submit"]');
+
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    });
+
+    showWelcome();
+}
+
+function setupSettingsOverlay(){
+    const settings=$('settingsModal');
+
+    if(!settings)return;
+
+    settings.addEventListener(
+        'click',
+        event=>{
+            if(event.target===settings){
+                settings.classList.remove(
+                    'open'
+                );
+
+                settings.setAttribute(
+                    'aria-hidden',
+                    'true'
+                );
+            }
+        }
+    );
+}
+
+function setupDynamicModal(){
+    const modal=$('dynamicModal');
+
+    if(!modal)return;
+
+    modal.addEventListener(
+        'click',
+        event=>{
+            if(event.target===modal){
+                closeModal();
+            }
+        }
+    );
+}
+
+function setupChat(){
+    const chat=$('chatModal');
+
+    if(!chat)return;
+
+    chat.addEventListener(
+        'click',
+        event=>{
+            if(event.target===chat){
+                closeChat();
+            }
+        }
+    );
+}
+
+function setupServiceWorker(){
+    if('serviceWorker' in navigator){
+        window.addEventListener(
+            'load',
+            ()=>{
+                navigator.serviceWorker
+                    .register('./service-worker.js')
+                    .catch(()=>{});
+            }
+        );
+    }
+}
+
+function init(){
+    state.incomes=Array.isArray(state.incomes)
+        ?state.incomes
+        :[];
+
+    currentMonth=ym(today());
+
+    document.querySelector(
+        '.mobile-nav'
+    ).replaceChildren(
+        ...[
+            ...document.querySelectorAll(
+                '.sidebar-nav button'
+            )
+        ].map(button=>{
+            const copy=button.cloneNode(true);
+
+            copy.className=
+                button.classList.contains('active')
+                    ?'active'
+                    :'';
+
+            return copy;
+        })
+    );
+
+    setupEvents();
+    setupWelcome();
+    setupSettingsOverlay();
+    setupDynamicModal();
+    setupChat();
+    setupServiceWorker();
+
+    save();
+    render();
+}
+
+if(document.readyState==='loading'){
+    document.addEventListener(
+        'DOMContentLoaded',
+        init
+    );
+}else{
+    init();
 }
 
 })();
