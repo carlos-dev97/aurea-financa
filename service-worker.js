@@ -1,4 +1,4 @@
-const CACHE = 'aurea-v26';
+const CACHE = 'aurea-v27';
 const APP_SHELL=[
     './',
     './index.html',
